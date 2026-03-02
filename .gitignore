@@ -1,0 +1,10 @@
+# OS/editor
+.DS_Store
+*.swp
+*.swo
+
+# Runtime scratch
+.tmp/
+
+# If you ever place raw exports here, keep them out of git
+*.raw.json
