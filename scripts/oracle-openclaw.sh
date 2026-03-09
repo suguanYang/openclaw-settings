@@ -17,6 +17,8 @@ Commands:
   restart          Restart the gateway service and print a short status block
   logs [n]         Tail gateway logs with journalctl (default: 120 lines)
   service-file     Print the live openclaw-gateway.service file
+  runtime-exec <cmd>
+                   Run a remote shell command with the gateway runtime PATH/env bootstrap
   doctor           Run OpenClaw doctor using the service's current Node + entrypoint
   health           Run OpenClaw health using the service's current Node + entrypoint
   update           Update the global pnpm install, repair the service, then restart + health
@@ -108,6 +110,11 @@ pnpm_bin="$pnpm_home/pnpm"
 npm_bin="${node_bin%/node}/npm"
 export PNPM_HOME="$pnpm_home"
 export PATH="$pnpm_home:$(dirname "$node_bin"):$PATH"
+if [ -f "$HOME/.openclaw/acp-harness.env" ]; then
+  set -a
+  . "$HOME/.openclaw/acp-harness.env"
+  set +a
+fi
 run_openclaw() {
   "$node_bin" "$openclaw_js" "$@"
 }
@@ -149,6 +156,13 @@ case "$cmd" in
     ;;
   service-file)
     run_logged_remote "service-file" "sed -n '1,220p' ~/.config/systemd/user/openclaw-gateway.service"
+    ;;
+  runtime-exec)
+    if [ "$#" -eq 0 ]; then
+      echo "runtime-exec requires a remote command" >&2
+      exit 1
+    fi
+    run_remote_openclaw "runtime-exec" "$*"
     ;;
   doctor)
     run_remote_openclaw "doctor" "run_openclaw doctor --non-interactive"

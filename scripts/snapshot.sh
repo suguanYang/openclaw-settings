@@ -30,6 +30,7 @@ collect_local() {
   copy_if_exists "sandbox/containers.json"
   copy_if_exists "cron/jobs.json"
   copy_if_exists "cron/jobs.json.bak"
+  copy_if_exists "acp-harness.env"
   copy_if_exists "discord/model-picker-preferences.json"
   copy_if_exists "devices/paired.json"
   copy_if_exists "devices/pending.json"
@@ -64,6 +65,23 @@ collect_local() {
     mkdir -p "$SRC_STAGE/$(dirname "$rel")"
     cp "$f" "$SRC_STAGE/$rel"
   done
+
+  if [ -f "$HOME/.codex/config.toml" ]; then
+    mkdir -p "$SRC_STAGE/codex"
+    cp "$HOME/.codex/config.toml" "$SRC_STAGE/codex/config.toml"
+  fi
+
+  if [ -f "$HOME/.claude/settings.json" ]; then
+    mkdir -p "$SRC_STAGE/claude"
+    cp "$HOME/.claude/settings.json" "$SRC_STAGE/claude/settings.json"
+  fi
+
+  if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf" ]; then
+    mkdir -p "$SRC_STAGE/systemd/openclaw-gateway.service.d"
+    cp \
+      "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf" \
+      "$SRC_STAGE/systemd/openclaw-gateway.service.d/acp-harness.conf"
+  fi
 }
 
 collect_remote() {
@@ -85,6 +103,7 @@ add_file "exec-approvals.json"
 add_file "sandbox/containers.json"
 add_file "cron/jobs.json"
 add_file "cron/jobs.json.bak"
+add_file "acp-harness.env"
 add_file "discord/model-picker-preferences.json"
 add_file "devices/paired.json"
 add_file "devices/pending.json"
@@ -106,6 +125,18 @@ done
 for f in skills/*/SKILL.md; do
   [ -f "$f" ] && paths+=("$f")
 done
+
+if [ -f "$HOME/.codex/config.toml" ]; then
+  paths+=("$HOME/.codex/config.toml")
+fi
+
+if [ -f "$HOME/.claude/settings.json" ]; then
+  paths+=("$HOME/.claude/settings.json")
+fi
+
+if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf" ]; then
+  paths+=("$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf")
+fi
 
 if [ "${#paths[@]}" -eq 0 ]; then
   exit 0
@@ -197,6 +228,20 @@ for src_file in sorted(src_root.rglob("*")):
         continue
 
     rel = src_file.relative_to(src_root)
+    if str(rel).startswith("home/"):
+        parts = rel.parts
+        if len(parts) >= 4 and parts[2] == ".codex" and parts[3] == "config.toml":
+            rel = Path("codex/config.toml")
+        elif len(parts) >= 4 and parts[2] == ".claude" and parts[3] == "settings.json":
+            rel = Path("claude/settings.json")
+        elif (
+            len(parts) >= 7
+            and parts[2] == ".config"
+            and parts[3] == "systemd"
+            and parts[4] == "user"
+            and parts[5] == "openclaw-gateway.service.d"
+        ):
+            rel = Path("systemd/openclaw-gateway.service.d") / parts[-1]
     out_file = out_root / rel
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
