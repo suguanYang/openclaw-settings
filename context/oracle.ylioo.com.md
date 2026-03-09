@@ -4,6 +4,7 @@ Last verified: 2026-03-09 UTC
 
 ## Current host facts
 - SSH target: `oracle.ylioo.com`
+- Host OS: Ubuntu 20.04.6 LTS (`focal`) on `aarch64`
 - State dir: `~/.openclaw`
 - Active service: `~/.config/systemd/user/openclaw-gateway.service`
 - Observed running version: `v2026.3.7`
@@ -74,6 +75,12 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 - `openclaw health` can return a transient loopback `1006` if probed immediately after restart; wait a few seconds before treating that as a real failure.
 - `@zed-industries/codex-acp` currently fails on Oracle Linux ARM64 with `libssl.so.3` missing, so Codex ACP is not yet usable end-to-end on this host without a host-library fix or adapter override.
 - `@zed-industries/claude-agent-acp` accepts the reused proxy auth on this host, but still rejects the tested Claude models as unavailable/inaccessible through the current third-party endpoint.
+- Local build attempts for `codex-acp` on this host hit a cascading toolchain gap:
+  - Ubuntu 20.04 only ships GCC 9.4, which `aws-lc-sys` rejects because of the known memcmp bug.
+  - User-local `zig` got past the GCC guard, but the build still failed later in the dependency graph with `libsqlx_macros... undefined symbol: __ubsan_handle_type_mismatch_v1`.
+- Practical recommendation for Codex ACP on this host:
+  - best fix: move the host to Ubuntu 22.04 or 24.04, or another newer ARM64 Linux baseline;
+  - fallback fix: install a full newer LLVM/clang + compiler-rt stack user-locally and keep a custom `~/.acpx/config.json` codex override.
 
 ## Freshness notes from 2026-03-09
 - Local repo `/home/suguan/github.com/openclaw` is at `f6243916b51ca4b4131674fa2f6fa9d863314c01`.

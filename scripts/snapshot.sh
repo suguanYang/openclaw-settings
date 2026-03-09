@@ -66,6 +66,11 @@ collect_local() {
     cp "$f" "$SRC_STAGE/$rel"
   done
 
+  if [ -f "$HOME/.acpx/config.json" ]; then
+    mkdir -p "$SRC_STAGE/acpx"
+    cp "$HOME/.acpx/config.json" "$SRC_STAGE/acpx/config.json"
+  fi
+
   if [ -f "$HOME/.codex/config.toml" ]; then
     mkdir -p "$SRC_STAGE/codex"
     cp "$HOME/.codex/config.toml" "$SRC_STAGE/codex/config.toml"
@@ -125,6 +130,10 @@ done
 for f in skills/*/SKILL.md; do
   [ -f "$f" ] && paths+=("$f")
 done
+
+if [ -f "$HOME/.acpx/config.json" ]; then
+  paths+=("$HOME/.acpx/config.json")
+fi
 
 if [ -f "$HOME/.codex/config.toml" ]; then
   paths+=("$HOME/.codex/config.toml")
@@ -230,7 +239,9 @@ for src_file in sorted(src_root.rglob("*")):
     rel = src_file.relative_to(src_root)
     if str(rel).startswith("home/"):
         parts = rel.parts
-        if len(parts) >= 4 and parts[2] == ".codex" and parts[3] == "config.toml":
+        if len(parts) >= 4 and parts[2] == ".acpx" and parts[3] == "config.json":
+            rel = Path("acpx/config.json")
+        elif len(parts) >= 4 and parts[2] == ".codex" and parts[3] == "config.toml":
             rel = Path("codex/config.toml")
         elif len(parts) >= 4 and parts[2] == ".claude" and parts[3] == "settings.json":
             rel = Path("claude/settings.json")
