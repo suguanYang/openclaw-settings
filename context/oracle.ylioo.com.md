@@ -101,3 +101,10 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 - Discord: `https://docs.openclaw.ai/channels/discord`
 - ACP Agents: `https://docs.openclaw.ai/tools/acp-agents`
 - Multi-Agent Routing: `https://docs.openclaw.ai/concepts/multi-agent`
+
+## Direct member mention workflow
+- Oracle still routes Discord channel `565501941510045707` to `research-lead`; direct Discord `@engineer` or `@researcher` text does not natively retarget routing on this OpenClaw checkout.
+- The managed workaround lives in `managed/workspace-research-lead/AGENTS.md` and is deployed to `~/.openclaw/workspace-research-lead/AGENTS.md`.
+- Supported leading dispatch tokens: `@engineer`, `@researcher`, `@reporter`, `@tracker`.
+- Because `AGENTS.md` bootstrap files are cached per session key, restarting the gateway or resetting the active session is the safest way to force the current Discord channel to pick up prompt changes.
+- `TEAM.md` remains human/operator documentation only; it is not auto-injected into the runtime bootstrap prompt on this OpenClaw checkout.
