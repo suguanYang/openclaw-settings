@@ -267,6 +267,19 @@ for src_file in sorted(src_root.rglob("*")):
         out_file.write_text(redact_string(text), encoding="utf-8")
     written.append(str(rel))
 
+expected = set(written)
+expected.add("_meta.json")
+for existing in sorted(out_root.rglob("*"), reverse=True):
+    if existing.is_file():
+        rel = str(existing.relative_to(out_root))
+        if rel not in expected:
+            existing.unlink()
+    elif existing.is_dir():
+        try:
+            existing.rmdir()
+        except OSError:
+            pass
+
 meta = {
     "capturedAtUtc": datetime.now(timezone.utc).isoformat(),
     "source": source_id,

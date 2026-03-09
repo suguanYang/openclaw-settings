@@ -106,10 +106,13 @@ node_bin="${exec_start%% *}"
 rest="${exec_start#* }"
 openclaw_js="${rest%% *}"
 pnpm_home="$HOME/.local/share/pnpm"
-pnpm_bin="$pnpm_home/pnpm"
 npm_bin="${node_bin%/node}/npm"
 export PNPM_HOME="$pnpm_home"
 export PATH="$pnpm_home:$(dirname "$node_bin"):$PATH"
+pnpm_bin="$(command -v pnpm || true)"
+if [ -z "$pnpm_bin" ]; then
+  pnpm_bin="$pnpm_home/pnpm"
+fi
 if [ -f "$HOME/.openclaw/acp-harness.env" ]; then
   set -a
   . "$HOME/.openclaw/acp-harness.env"
