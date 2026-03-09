@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+shopt -s nullglob
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="$ROOT/snapshots"
@@ -33,8 +34,21 @@ collect_local() {
   copy_if_exists "devices/paired.json"
   copy_if_exists "devices/pending.json"
 
-  for f in AGENTS.md BOOTSTRAP.md SOUL.md USER.md IDENTITY.md TOOLS.md HEARTBEAT.md; do
-    copy_if_exists "workspace/$f"
+  for workspace_dir in "$base"/workspace "$base"/workspace-*; do
+    [ -d "$workspace_dir" ] || continue
+    workspace_rel="${workspace_dir#$base/}"
+    for f in "$workspace_dir"/*.md; do
+      [ -f "$f" ] || continue
+      rel="${f#$base/}"
+      mkdir -p "$SRC_STAGE/$(dirname "$rel")"
+      cp "$f" "$SRC_STAGE/$rel"
+    done
+    for f in "$workspace_dir"/skills/*/SKILL.md; do
+      [ -f "$f" ] || continue
+      rel="${f#$base/}"
+      mkdir -p "$SRC_STAGE/$(dirname "$rel")"
+      cp "$f" "$SRC_STAGE/$rel"
+    done
   done
 
   for f in "$base"/openclaw.json.bak*; do
@@ -75,8 +89,14 @@ add_file "discord/model-picker-preferences.json"
 add_file "devices/paired.json"
 add_file "devices/pending.json"
 
-for f in workspace/AGENTS.md workspace/BOOTSTRAP.md workspace/SOUL.md workspace/USER.md workspace/IDENTITY.md workspace/TOOLS.md workspace/HEARTBEAT.md; do
-  add_file "$f"
+for workspace_dir in workspace workspace-*; do
+  [ -d "$workspace_dir" ] || continue
+  for f in "$workspace_dir"/*.md; do
+    [ -f "$f" ] && paths+=("$f")
+  done
+  for f in "$workspace_dir"/skills/*/SKILL.md; do
+    [ -f "$f" ] && paths+=("$f")
+  done
 done
 
 for f in openclaw.json.bak*; do
