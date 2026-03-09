@@ -105,6 +105,8 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 ## Direct member mention workflow
 - Oracle still routes Discord channel `565501941510045707` to `research-lead`; direct Discord `@engineer` or `@researcher` text does not natively retarget routing on this OpenClaw checkout.
 - The managed workaround lives in `managed/workspace-research-lead/AGENTS.md` and is deployed to `~/.openclaw/workspace-research-lead/AGENTS.md`.
-- Supported leading dispatch tokens: `@engineer`, `@researcher`, `@reporter`, `@tracker`.
+- Supported leading wake or dispatch tokens: `@manager`, `@lead`, `@engineer`, `@researcher`, `@reporter`, `@tracker`.
+- Discord guild `565501940742619145` now runs with `requireMention=true`, so the bot should stay silent in that guild unless the message explicitly mentions the bot or matches one of those configured member aliases.
+- `research-lead` now accepts only those explicit leading teammate mentions for dispatch; without a leading teammate token, it stays in manager mode and does not spawn specialist teammates.
 - Because `AGENTS.md` bootstrap files are cached per session key, restarting the gateway or resetting the active session is the safest way to force the current Discord channel to pick up prompt changes.
 - `TEAM.md` remains human/operator documentation only; it is not auto-injected into the runtime bootstrap prompt on this OpenClaw checkout.
