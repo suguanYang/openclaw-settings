@@ -14,6 +14,9 @@ Last verified: 2026-03-09 UTC
 - Shell PATH caveat: non-interactive `zsh -lc` did not resolve `openclaw`, `node`, `npm`, or `pnpm`; use absolute paths or `scripts/oracle-openclaw.sh`.
 - PNPM caveat: global writes require `PNPM_HOME=/home/suguan/.local/share/pnpm`.
 
+## Research team docs
+- Team runbook: `context/oracle-research-team.md`
+
 ## Research team routing
 - Default gateway agent is preserved as `main`.
 - Discord channel `565501941510045707` (`sstar/general`) is explicitly routed to `research-lead`.
