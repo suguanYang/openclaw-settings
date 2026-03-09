@@ -19,7 +19,9 @@ Commands:
   service-file     Print the live openclaw-gateway.service file
   doctor           Run OpenClaw doctor using the service's current Node + entrypoint
   health           Run OpenClaw health using the service's current Node + entrypoint
-  update-npm       Update the global npm install, then doctor + restart + health
+  update           Update the global pnpm install, repair the service, then restart + health
+  update-pnpm      Same as update
+  update-npm       Backward-compatible alias for update-pnpm
   exec <cmd>       Run an arbitrary remote shell command
 USAGE
 }
@@ -101,7 +103,11 @@ fi
 node_bin="${exec_start%% *}"
 rest="${exec_start#* }"
 openclaw_js="${rest%% *}"
+pnpm_home="$HOME/.local/share/pnpm"
+pnpm_bin="$pnpm_home/pnpm"
 npm_bin="${node_bin%/node}/npm"
+export PNPM_HOME="$pnpm_home"
+export PATH="$pnpm_home:$(dirname "$node_bin"):$PATH"
 run_openclaw() {
   "$node_bin" "$openclaw_js" "$@"
 }
@@ -150,11 +156,12 @@ case "$cmd" in
   health)
     run_remote_openclaw "health" "run_openclaw health"
     ;;
-  update-npm)
-    run_remote_openclaw "update-npm" '"$npm_bin" install -g openclaw@latest
-run_openclaw doctor --yes
+  update|update-pnpm|update-npm)
+    run_remote_openclaw "update-pnpm" '"$pnpm_bin" add -g openclaw@latest
+"$pnpm_home/openclaw" doctor --yes --fix
+systemctl --user daemon-reload
 systemctl --user restart openclaw-gateway.service
-run_openclaw health
+"$pnpm_home/openclaw" health
 systemctl --user status openclaw-gateway.service --no-pager | sed -n "1,80p"'
     ;;
   exec)

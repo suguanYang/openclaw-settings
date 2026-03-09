@@ -15,6 +15,7 @@ Local-only Git repo for tracking redacted OpenClaw server state, operator logs, 
    `./scripts/oracle-openclaw.sh status`
    `./scripts/oracle-openclaw.sh logs 120`
    `./scripts/oracle-openclaw.sh snapshot`
+   `./scripts/oracle-openclaw.sh update`
 3. Review drift:
    `git -C . status`
    `git -C . diff`
