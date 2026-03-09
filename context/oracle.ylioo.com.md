@@ -15,6 +15,7 @@ Last verified: 2026-03-09 UTC
 - PNPM caveat: global writes require `PNPM_HOME=/home/suguan/.local/share/pnpm`.
 
 ## Research team docs
+- Real Discord bots checklist: `context/oracle-discord-real-bots-checklist.md`
 - Team runbook: `context/oracle-research-team.md`
 
 ## Research team routing
