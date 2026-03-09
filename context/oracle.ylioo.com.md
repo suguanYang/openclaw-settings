@@ -34,14 +34,14 @@ Last verified: 2026-03-09 UTC
 - `~/.claude/settings.json` is present and currently pins `claude-sonnet-4-5-20250929`.
 - `scripts/oracle-openclaw.sh runtime-exec` now sources `~/.openclaw/acp-harness.env` so local smoke checks use the same extra env as the real gateway process.
 - Current ACP smoke status:
-  - Claude ACP reaches the reused proxy auth path, but the provider currently returns `model_not_found` / `No available channel` for all tested Claude model ids:
-    - `claude-sonnet-4-6`
-    - `claude-opus-4-6`
-    - `claude-opus-4-5-20251101`
-    - `claude-sonnet-4-5-20250929`
-    - `claude-opus-4-1-20250805`
-    - `claude-3-7-sonnet-20250219`
-  - Practical effect: Claude ACP is configured as the only allowed ACP path, but it still needs a working Claude-capable provider channel or a replacement token/base URL before it can complete live jobs.
+  - Re-test at 2026-03-09T08:21Z showed the raw Anthropic-compatible endpoint is currently healthy again:
+    - `GET https://api.ikuncode.cc/v1/models` returned `200`
+    - `POST https://api.ikuncode.cc/v1/messages` returned `200` for:
+      - `claude-opus-4-6`
+      - `claude-sonnet-4-6`
+      - `claude-haiku-4-5-20251001`
+  - Earlier `model_not_found` responses observed around 2026-03-09T08:04Z appear to have been transient provider-side behavior rather than a persistent local config problem.
+  - Claude-only ACP config remains live on Oracle, but `@zed-industries/claude-agent-acp` itself was not re-smoke-tested end-to-end after the provider recovered.
   - Codex ACP was intentionally removed from the live Oracle config for now instead of keeping a broken fallback.
 
 ## Current drift snapshot
@@ -80,7 +80,7 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 - `openclaw doctor --yes --fix` does apply the `systemd` service rewrite in a non-TTY session.
 - `openclaw health` can return a transient loopback `1006` if probed immediately after restart; wait a few seconds before treating that as a real failure.
 - `@zed-industries/codex-acp` currently fails on Oracle Linux ARM64 with `libssl.so.3` missing, so Codex ACP is not yet usable end-to-end on this host without a host-library fix or adapter override.
-- `@zed-industries/claude-agent-acp` accepts the reused proxy auth on this host, but the current third-party endpoint still rejects the tested Claude models as unavailable/inaccessible.
+- The reused Claude proxy on this host has shown transient behavior on 2026-03-09: early probes returned `model_not_found`, while a later re-test returned `200` for `/models` and current Claude `/messages` calls.
 - Local build attempts for `codex-acp` on this host hit a cascading toolchain gap:
   - Ubuntu 20.04 only ships GCC 9.4, which `aws-lc-sys` rejects because of the known memcmp bug.
   - User-local `zig` got past the GCC guard, but the build still failed later in the dependency graph with `libsqlx_macros... undefined symbol: __ubsan_handle_type_mismatch_v1`.
