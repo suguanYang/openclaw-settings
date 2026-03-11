@@ -407,9 +407,6 @@
       },
       "groupPolicy": "allowlist",
       "streaming": "partial",
-      "allowFrom": [
-        "__OPENCLAW_DISCORD_OWNER_USER_ID__"
-      ],
       "guilds": {
         "__OPENCLAW_DISCORD_GUILD_ID__": {
           "requireMention": true,
@@ -432,24 +429,41 @@
       },
       "defaultAccount": "manager",
       "accounts": {
+        "default": {
+          "allowFrom": [
+            "__OPENCLAW_DISCORD_OWNER_USER_ID__"
+          ],
+          "groupPolicy": "allowlist",
+          "streaming": "off"
+        },
         "manager": {
           "name": "OpenClaw Manager",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
           "token": "${DISCORD_MANAGER_TOKEN}"
         },
         "engineer": {
           "name": "OpenClaw Engineer",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
           "token": "${DISCORD_ENGINEER_TOKEN}"
         },
         "researcher": {
           "name": "OpenClaw Researcher",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
           "token": "${DISCORD_RESEARCHER_TOKEN}"
         },
         "reporter": {
           "name": "OpenClaw Reporter",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
           "token": "${DISCORD_REPORTER_TOKEN}"
         },
         "tracker": {
           "name": "OpenClaw Tracker",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
           "token": "${DISCORD_TRACKER_TOKEN}"
         }
       }
