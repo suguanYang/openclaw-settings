@@ -1,0 +1,84 @@
+# oracle.ylioo.com Runtime
+
+Last verified: 2026-03-11 UTC
+
+## Current host facts
+- SSH target: `oracle.ylioo.com`
+- Host OS: Ubuntu 20.04.6 LTS (`focal`) on `aarch64`
+- State dir: `~/.openclaw`
+- Active service: `~/.config/systemd/user/openclaw-gateway.service`
+- Observed running version: `v2026.3.8`
+- Observed service port: `18789`
+- ExecStart node: `/home/suguan/.nvm/versions/node/v22.18.0/bin/node`
+- ExecStart entrypoint: `/home/suguan/.local/share/pnpm/global/5/.pnpm/openclaw@2026.3.8_.../node_modules/openclaw/dist/index.js`
+- Shell PATH caveat: non-interactive `zsh -lc` does not resolve `openclaw`, `node`, `npm`, or `pnpm`; use absolute paths or `scripts/oracle-openclaw.sh`.
+- PNPM caveat: global writes require `PNPM_HOME=/home/suguan/.local/share/pnpm`.
+
+## Related docs
+- Host index: `README.md`
+- Discord project: `projects/discord-real-bots.md`
+- Team runbook: `runbooks/research-team.md`
+
+## Research team routing
+- Routed Discord guild: `565501940742619145` (`sstar`)
+- Routed Discord channel: `565501941510045707` (`#general`)
+- Discord is configured with `channels.discord.accounts` and `channels.discord.defaultAccount = manager`.
+- Live Discord account to agent bindings are:
+  - `manager` -> `research-lead`
+  - `engineer` -> `engineer`
+  - `researcher` -> `researcher`
+  - `reporter` -> `reporter`
+  - `tracker` -> `tracker`
+- `requireMention=true` is enabled for the guild, so the team should stay silent unless one of the bot members is explicitly mentioned.
+- Confirmed in the live Discord UI on 2026-03-11 that all 5 real bot members are present in `sstar`:
+  - `OpenClaw Manager`
+  - `OpenClaw Engineer`
+  - `OpenClaw Researcher`
+  - `OpenClaw Reporter`
+  - `OpenClaw Tracker`
+- The legacy placeholder Discord member `bot1469239070508191847` was removed from `sstar` after the real manager cutover was verified.
+
+## ACP and plugin state
+- `acp.enabled=true` with backend `acpx`.
+- `acp.defaultAgent=claude`.
+- Allowed ACP harness ids: `claude`.
+- Normal team-agent turns are now Codex-first:
+  - `main`, `research-lead`, `researcher`, `engineer`, `reporter`, and `tracker` all run `ikuncode-codex/gpt-5.3-codex` by default.
+  - Claude API models were removed from the normal team allowlist in `agents.defaults.models`.
+  - Claude remains reserved for explicit ACP / Claude Code usage rather than the normal member message path.
+- `channels.discord.threadBindings` is enabled with both `spawnSubagentSessions=true` and `spawnAcpSessions=true`.
+- Bundled plugins `acpx`, `discord`, and `open-prose` are enabled and observed loaded after restart.
+- Host PATH does not contain standalone `acpx`, `codex`, `claude`, `claude-code`, `opencode`, or `gemini` binaries; OpenClaw currently relies on the bundled `acpx` runtime path.
+- Gateway service imports `%h/.openclaw/acp-harness.env` through `~/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`.
+- `~/.openclaw/acp-harness.env` is generated from `~/.openclaw/openclaw.json` and now reuses only the `ikuncode-claude` Anthropic-compatible settings.
+- `~/.codex/config.toml` was removed from the host on 2026-03-09 when Codex ACP was disabled.
+- `~/.claude/settings.json` is present and currently pins `claude-sonnet-4-5-20250929`.
+- `scripts/oracle-openclaw.sh runtime-exec` now sources `~/.openclaw/acp-harness.env` so local smoke checks use the same extra env as the real gateway process.
+- Global sandbox defaults keep `docker.binds=[]`.
+- The earlier engineer-only GitHub CLI bind-mount workaround was removed from the normal engineer agent path on 2026-03-11 because it blocked manager-spawned engineer subagents.
+- For heavier repo or GitHub-auth work, prefer Claude ACP threads instead of relying on GitHub CLI inside the normal engineer sandbox.
+- Preferred engineer smoke test:
+  - `./scripts/oracle-openclaw.sh runtime-exec 'run_openclaw agent --agent engineer --message "Reply with exactly: engineer ok" --json'`
+- 2026-03-11 engineer re-test result:
+  - before the Codex-first switch, the earlier bind-mount sandbox rejection was gone;
+  - the remaining Claude-path failure was upstream model-provider availability: `HTTP 503 new_api_error: No available channel for model claude-sonnet-4-6 under group cc逆向 (distributor)`.
+  - after the Codex-first switch, the same smoke test succeeded with provider `ikuncode-codex` and model `gpt-5.3-codex`.
+- Current ACP smoke status:
+  - Re-test at `2026-03-09T08:21Z` showed the raw Anthropic-compatible endpoint is currently healthy again:
+    - `GET https://api.ikuncode.cc/v1/models` returned `200`
+    - `POST https://api.ikuncode.cc/v1/messages` returned `200` for:
+      - `claude-opus-4-6`
+      - `claude-sonnet-4-6`
+      - `claude-haiku-4-5-20251001`
+  - Earlier `model_not_found` responses observed around `2026-03-09T08:04Z` appear to have been transient provider-side behavior rather than a persistent local config problem.
+  - Claude-only ACP config remains live on Oracle.
+  - Codex ACP was intentionally removed from the live Oracle config for now instead of keeping a broken fallback.
+
+## Direct member mention workflow
+- Real Discord member mentions are now the primary dispatch path on Oracle.
+- Mentioning `OpenClaw Manager` in `#general` routes the message to `research-lead` through Discord account `manager`.
+- `research-lead` is configured to auto-delegate substantial tasks to `researcher`, `engineer`, `reporter`, and `tracker` instead of waiting for explicit teammate mentions.
+- Mentioning `OpenClaw Engineer`, `OpenClaw Researcher`, `OpenClaw Reporter`, or `OpenClaw Tracker` routes directly to the matching specialized agent through its own Discord account binding.
+- Plain text without an explicit bot mention should stay silent because `requireMention=true` is enabled.
+- The earlier `@manager` / `@engineer` alias-based manager prompt still exists in `workspace-research-lead/AGENTS.md`, but manager-only flows now also allow autonomous internal delegation.
+- Operational guidance: mention one teammate bot per message to avoid ambiguous multi-bot wakeups on the shared channel.
