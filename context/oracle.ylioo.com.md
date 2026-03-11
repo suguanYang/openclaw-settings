@@ -41,6 +41,10 @@ Last verified: 2026-03-11 UTC
 - `acp.enabled=true` with backend `acpx`.
 - `acp.defaultAgent=claude`.
 - Allowed ACP harness ids: `claude`.
+- Normal team-agent turns are now Codex-first:
+  - `main`, `research-lead`, `researcher`, `engineer`, `reporter`, and `tracker` all run `ikuncode-codex/gpt-5.3-codex` by default.
+  - Claude API models were removed from the normal team allowlist in `agents.defaults.models`.
+  - Claude remains reserved for explicit ACP / Claude Code usage rather than the normal member message path.
 - `channels.discord.threadBindings` is enabled with both `spawnSubagentSessions=true` and `spawnAcpSessions=true`.
 - Bundled plugins `acpx`, `discord`, and `open-prose` are enabled and observed loaded after restart.
 - Host PATH does not contain standalone `acpx`, `codex`, `claude`, `claude-code`, `opencode`, or `gemini` binaries; OpenClaw currently relies on the bundled `acpx` runtime path.
@@ -53,8 +57,9 @@ Last verified: 2026-03-11 UTC
 - Preferred engineer smoke test:
   - `./scripts/oracle-openclaw.sh runtime-exec 'run_openclaw agent --agent engineer --message "Reply with exactly: engineer ok" --json'`
 - 2026-03-11 engineer re-test result:
-  - the earlier bind-mount sandbox rejection is gone;
-  - the current failure is upstream model-provider availability: `HTTP 503 new_api_error: No available channel for model claude-sonnet-4-6 under group cc逆向 (distributor)`.
+  - before the Codex-first switch, the earlier bind-mount sandbox rejection was gone;
+  - the remaining Claude-path failure was upstream model-provider availability: `HTTP 503 new_api_error: No available channel for model claude-sonnet-4-6 under group cc逆向 (distributor)`.
+  - after the Codex-first switch, the same smoke test succeeded with provider `ikuncode-codex` and model `gpt-5.3-codex`.
 - Current ACP smoke status:
   - Re-test at 2026-03-09T08:21Z showed the raw Anthropic-compatible endpoint is currently healthy again:
     - `GET https://api.ikuncode.cc/v1/models` returned `200`
@@ -125,6 +130,7 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 ## Repair notes discovered on 2026-03-09
 - `pnpm add -g openclaw@2026.3.8` succeeds only when `PNPM_HOME=/home/suguan/.local/share/pnpm` is exported.
 - `scripts/oracle-openclaw.sh update` now resolves `pnpm` from `PATH` first and falls back to `$PNPM_HOME/pnpm`, which matches the current Oracle host layout.
+- `scripts/apply-managed-host.sh` now bootstraps `node` from the live systemd service ExecStart (and then NVM as fallback), so non-interactive Oracle applies no longer fail just because `node` is missing from SSH PATH.
 - `openclaw doctor --non-interactive --fix` does not apply service-file repairs.
 - `openclaw doctor --yes --fix` does apply the `systemd` service rewrite in a non-TTY session.
 - `openclaw health` can return a transient loopback `1006` if probed immediately after restart; wait a few seconds before treating that as a real failure.

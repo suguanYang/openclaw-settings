@@ -148,20 +148,17 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "ikuncode-claude/claude-opus-4-5-20251101"
+        "primary": "ikuncode-codex/gpt-5.3-codex"
       },
       "models": {
-        "ikuncode-claude/claude-opus-4-5-20251101": {
+        "ikuncode-codex/gpt-5.3-codex": {
           "params": {
             "maxTokens": 1024
           },
           "streaming": false
         },
-        "ikuncode-codex/gpt-5.3-codex": {},
         "ikuncode-codex/gpt-5.2-codex": {},
-        "ikuncode-codex/gpt-5.2": {},
-        "ikuncode-claude/claude-sonnet-4-6": {},
-        "ikuncode-claude/claude-opus-4-6": {}
+        "ikuncode-codex/gpt-5.2": {}
       },
       "workspace": "__OPENCLAW_WORKSPACE_ROOT__",
       "compaction": {
@@ -207,7 +204,7 @@
         "name": "Research Lead",
         "workspace": "~/.openclaw/workspace-research-lead",
         "agentDir": "~/.openclaw/agents/research-lead/agent",
-        "model": "ikuncode-claude/claude-opus-4-5-20251101",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "groupChat": {
           "mentionPatterns": [
             "@manager\b",
@@ -240,7 +237,7 @@
         "name": "Researcher",
         "workspace": "~/.openclaw/workspace-researcher",
         "agentDir": "~/.openclaw/agents/researcher/agent",
-        "model": "ikuncode-claude/claude-sonnet-4-6",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
           "workspaceAccess": "rw",
@@ -252,7 +249,7 @@
         "name": "Engineer",
         "workspace": "~/.openclaw/workspace-engineer",
         "agentDir": "~/.openclaw/agents/engineer/agent",
-        "model": "ikuncode-claude/claude-sonnet-4-6",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
           "workspaceAccess": "rw",
@@ -271,7 +268,7 @@
         "name": "Reporter",
         "workspace": "~/.openclaw/workspace-reporter",
         "agentDir": "~/.openclaw/agents/reporter/agent",
-        "model": "ikuncode-claude/claude-sonnet-4-6",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
           "workspaceAccess": "rw",
@@ -288,7 +285,7 @@
         "name": "Tracker",
         "workspace": "~/.openclaw/workspace-tracker",
         "agentDir": "~/.openclaw/agents/tracker/agent",
-        "model": "ikuncode-claude/claude-sonnet-4-6",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
           "workspaceAccess": "rw",

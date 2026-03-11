@@ -204,6 +204,34 @@ copy_tree_to_remote "upload-systemd-dropin" "$stage_dir/systemd" '~/.config/syst
 remote_install_script=$(cat <<'REMOTE'
 set -euo pipefail
 
+ensure_node_on_path() {
+  if command -v node >/dev/null 2>&1; then
+    return 0
+  fi
+
+  service="$HOME/.config/systemd/user/openclaw-gateway.service"
+  if [ -f "$service" ]; then
+    exec_start="$(sed -n 's/^ExecStart=//p' "$service" | head -n 1)"
+    if [ -n "$exec_start" ]; then
+      node_bin="${exec_start%% *}"
+      if [ -x "$node_bin" ]; then
+        export PATH="$(dirname "$node_bin"):$PATH"
+      fi
+    fi
+  fi
+
+  if command -v node >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    # shellcheck disable=SC1090
+    . "$HOME/.nvm/nvm.sh"
+    nvm use >/dev/null 2>&1 || true
+  fi
+}
+
+ensure_node_on_path
 if ! command -v node >/dev/null 2>&1; then
   echo "missing node; install Node 22+ before applying managed OpenClaw state" >&2
   exit 1
