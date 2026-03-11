@@ -1,6 +1,6 @@
 # oracle.ylioo.com OpenClaw Context
 
-Last verified: 2026-03-09 UTC
+Last verified: 2026-03-11 UTC
 
 ## Current host facts
 - SSH target: `oracle.ylioo.com`
@@ -11,19 +11,30 @@ Last verified: 2026-03-09 UTC
 - Observed service port: `18789`
 - ExecStart node: `/home/suguan/.nvm/versions/node/v22.18.0/bin/node`
 - ExecStart entrypoint: `/home/suguan/.local/share/pnpm/global/5/.pnpm/openclaw@2026.3.8_.../node_modules/openclaw/dist/index.js`
-- Shell PATH caveat: non-interactive `zsh -lc` did not resolve `openclaw`, `node`, `npm`, or `pnpm`; use absolute paths or `scripts/oracle-openclaw.sh`.
+- Shell PATH caveat: non-interactive `zsh -lc` does not resolve `openclaw`, `node`, `npm`, or `pnpm`; use absolute paths or `scripts/oracle-openclaw.sh`.
 - PNPM caveat: global writes require `PNPM_HOME=/home/suguan/.local/share/pnpm`.
 
 ## Research team docs
-- Real Discord bots checklist: `context/oracle-discord-real-bots-checklist.md`
+- Real Discord bot status: `context/oracle-discord-real-bots-checklist.md`
 - Team runbook: `context/oracle-research-team.md`
 
 ## Research team routing
-- Default gateway agent is preserved as `main`.
-- Discord channel `565501941510045707` (`sstar/general`) is explicitly routed to `research-lead`.
-- Specialized agents installed: `research-lead`, `researcher`, `engineer`, `reporter`, `tracker`.
-- `research-lead` is unsandboxed with `exec` denied so it can orchestrate ACP while leaving code execution to specialists.
-- `researcher`, `engineer`, `reporter`, and `tracker` use agent-scoped sandboxing.
+- Routed Discord guild: `565501940742619145` (`sstar`)
+- Routed Discord channel: `565501941510045707` (`#general`)
+- Discord is now configured with `channels.discord.accounts` and `channels.discord.defaultAccount = manager`.
+- Live Discord account to agent bindings are:
+  - `manager` -> `research-lead`
+  - `engineer` -> `engineer`
+  - `researcher` -> `researcher`
+  - `reporter` -> `reporter`
+  - `tracker` -> `tracker`
+- `requireMention=true` is enabled for the guild, so the team should stay silent unless one of the bot members is explicitly mentioned.
+- Confirmed in the live Discord UI on 2026-03-11 that all 5 real bot members are present in `sstar`:
+  - `OpenClaw Manager`
+  - `OpenClaw Engineer`
+  - `OpenClaw Researcher`
+  - `OpenClaw Reporter`
+  - `OpenClaw Tracker`
 
 ## ACP and plugin state
 - `acp.enabled=true` with backend `acpx`.
@@ -45,18 +56,33 @@ Last verified: 2026-03-09 UTC
       - `claude-sonnet-4-6`
       - `claude-haiku-4-5-20251001`
   - Earlier `model_not_found` responses observed around 2026-03-09T08:04Z appear to have been transient provider-side behavior rather than a persistent local config problem.
-  - Claude-only ACP config remains live on Oracle, but `@zed-industries/claude-agent-acp` itself was not re-smoke-tested end-to-end after the provider recovered.
+  - Claude-only ACP config remains live on Oracle.
   - Codex ACP was intentionally removed from the live Oracle config for now instead of keeping a broken fallback.
 
+## Discord multi-account cutover state
+- Remote `~/.openclaw/.env` now contains the managed Discord token variables:
+  - `DISCORD_MANAGER_TOKEN`
+  - `DISCORD_ENGINEER_TOKEN`
+  - `DISCORD_RESEARCHER_TOKEN`
+  - `DISCORD_REPORTER_TOKEN`
+  - `DISCORD_TRACKER_TOKEN`
+- `OPENAI_API_KEY` was preserved in the same remote env file during the merge.
+- Remote config backup created during cutover:
+  - `~/.openclaw/openclaw.json.pre-discord-multi-account.20260311T052148Z.bak`
+- Gateway restart and log verification confirmed all 5 Discord providers started and logged in successfully.
+- `openclaw health` currently reports only the default Discord account, so full multi-account verification should use gateway logs in addition to health.
+
 ## Current drift snapshot
-- The redacted snapshot is synced as of 2026-03-09 UTC.
-- Snapshot files do not include the base `systemd` unit, so service-entrypoint/version changes are tracked in `operation-logs/` and this context file.
+- The redacted snapshot is synced as of 2026-03-11 UTC.
+- Snapshot files do not include Oracle plaintext secret files.
 - Snapshot coverage now includes:
   - `acp-harness.env`
   - `claude/settings.json`
   - `systemd/openclaw-gateway.service.d/acp-harness.conf`
-- `scripts/snapshot.sh` now captures top-level Markdown files and `skills/*/SKILL.md` from both `workspace/` and `workspace-*` directories so multi-agent runbooks stay synced locally.
-- `scripts/snapshot.sh` now also prunes stale snapshot files, so removed host-side files (for example `codex/config.toml`) disappear from the local snapshot on the next sync.
+  - top-level Markdown files from `workspace/` and `workspace-*`
+  - `skills/*/SKILL.md` from `workspace/` and `workspace-*`
+- `scripts/snapshot.sh` prunes stale snapshot files so removed host-side files disappear on the next sync.
+- A temporary local `snapshots/.env` capture was removed on 2026-03-11 and the snapshot was refreshed; current `_meta.json` confirms no `.env` file is tracked.
 
 ## Preferred commands from this repo
 - Status: `./scripts/oracle-openclaw.sh status`
@@ -68,6 +94,7 @@ Last verified: 2026-03-09 UTC
 - Doctor: `./scripts/oracle-openclaw.sh doctor`
 - Health: `./scripts/oracle-openclaw.sh health`
 - Update: `./scripts/oracle-openclaw.sh update`
+- Discord cutover helper: `./scripts/oracle-discord-cutover.sh`
 
 ## Update flow for this host
 1. `./scripts/oracle-openclaw.sh snapshot`
@@ -75,7 +102,7 @@ Last verified: 2026-03-09 UTC
 3. `./scripts/oracle-openclaw.sh status`
 4. `./scripts/oracle-openclaw.sh logs 120`
 
-Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for this host, `update` is the closest non-interactive equivalent because the current service now points at the PNPM global package tree while still using the NVM Node 22.18.0 runtime.
+Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for this host, `update` is the closest non-interactive equivalent because the current service points at the PNPM global package tree while still using the NVM Node 22.18.0 runtime.
 
 ## Repair notes discovered on 2026-03-09
 - `pnpm add -g openclaw@2026.3.8` succeeds only when `PNPM_HOME=/home/suguan/.local/share/pnpm` is exported.
@@ -92,10 +119,9 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
   - best fix: move the host to Ubuntu 22.04 or 24.04, or another newer ARM64 Linux baseline;
   - fallback fix: install a full newer LLVM/clang + compiler-rt stack user-locally and keep a custom `~/.acpx/config.json` codex override.
 
-## Freshness notes from 2026-03-09
-- Local repo `/home/suguan/github.com/openclaw` is at `f6243916b51ca4b4131674fa2f6fa9d863314c01`.
-- Upstream `main` was `3caab9260cb0a0064e6a37b2de3bedc8a547e599` when checked via GitHub on 2026-03-09.
-- Latest GitHub release observed: `v2026.3.8` published 2026-03-09.
+## Freshness notes
+- Local reference repo `/home/suguan/github.com/openclaw` has uncommitted local files right now, so it was not auto-fast-forwarded during this sync pass.
+- Live Oracle deployment verified against the current installed OpenClaw `v2026.3.8` on 2026-03-11.
 
 ## Official docs checked
 - Install: `https://docs.openclaw.ai/install`
@@ -107,22 +133,20 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 - Multi-Agent Routing: `https://docs.openclaw.ai/concepts/multi-agent`
 
 ## Direct member mention workflow
-- Oracle still routes Discord channel `565501941510045707` to `research-lead`; direct Discord `@engineer` or `@researcher` text does not natively retarget routing on this OpenClaw checkout.
-- The managed workaround lives in `managed/workspace-research-lead/AGENTS.md` and is deployed to `~/.openclaw/workspace-research-lead/AGENTS.md`.
-- Supported leading wake or dispatch tokens: `@manager`, `@lead`, `@engineer`, `@researcher`, `@reporter`, `@tracker`.
-- Discord guild `565501940742619145` now runs with `requireMention=true`, so the bot should stay silent in that guild unless the message explicitly mentions the bot or matches one of those configured member aliases.
-- `research-lead` now accepts only those explicit leading teammate mentions for dispatch; without a leading teammate token, it stays in manager mode and does not spawn specialist teammates.
-- Because `AGENTS.md` bootstrap files are cached per session key, restarting the gateway or resetting the active session is the safest way to force the current Discord channel to pick up prompt changes.
-- `TEAM.md` remains human/operator documentation only; it is not auto-injected into the runtime bootstrap prompt on this OpenClaw checkout.
+- Real Discord member mentions are now the primary dispatch path on Oracle.
+- Mentioning `OpenClaw Manager` in `#general` routes the message to `research-lead` through Discord account `manager`.
+- Mentioning `OpenClaw Engineer`, `OpenClaw Researcher`, `OpenClaw Reporter`, or `OpenClaw Tracker` routes directly to the matching specialized agent through its own Discord account binding.
+- Plain text without an explicit bot mention should stay silent because `requireMention=true` is enabled.
+- The earlier `@manager` / `@engineer` alias-based manager prompt still exists in `workspace-research-lead/AGENTS.md`, but it is now a fallback compatibility layer rather than the primary user UX.
+- Operational guidance: mention one teammate bot per message to avoid ambiguous multi-bot wakeups on the shared channel.
 
 ## Discord real-bot portal status from 2026-03-11
 - Confirmed directly in Discord web that Oracle guild `565501940742619145` is `sstar` and routed channel `565501941510045707` is `#general`.
-- Discord application `OpenClaw Engineer` now exists with application id `1481122055184187432`.
-- `OpenClaw Engineer` bot configuration has been updated in the Discord Developer Portal with:
-  - `Server Members Intent = enabled`
-  - `Message Content Intent = enabled`
-  - baseline permissions integer `117824`
-- `OpenClaw Engineer` invite flow to `sstar` was started but is currently blocked on a manual hCaptcha challenge before final authorization.
-- `OpenClaw Researcher` creation was started but is also blocked on a manual hCaptcha challenge.
-- Upstream `openclaw/openclaw` `main` still documents and types the Discord multi-account path through `channels.discord.accounts`, `channels.discord.defaultAccount`, and binding-level `match.accountId`.
-- Oracle has not yet been switched from the current single-account Discord config in this session.
+- Discord application ids:
+  - `OpenClaw Manager`: `1481108454704943227`
+  - `OpenClaw Engineer`: `1481122055184187432`
+  - `OpenClaw Researcher`: `1481133991749750886`
+  - `OpenClaw Reporter`: `1481138115887501382`
+  - `OpenClaw Tracker`: `1481136653342081085`
+- All 5 apps are invited into `sstar` and visible in the live member/join events.
+- Oracle is now switched from single-account Discord config to multi-account Discord config.
