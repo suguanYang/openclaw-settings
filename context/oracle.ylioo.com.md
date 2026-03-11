@@ -114,3 +114,15 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 - `research-lead` now accepts only those explicit leading teammate mentions for dispatch; without a leading teammate token, it stays in manager mode and does not spawn specialist teammates.
 - Because `AGENTS.md` bootstrap files are cached per session key, restarting the gateway or resetting the active session is the safest way to force the current Discord channel to pick up prompt changes.
 - `TEAM.md` remains human/operator documentation only; it is not auto-injected into the runtime bootstrap prompt on this OpenClaw checkout.
+
+## Discord real-bot portal status from 2026-03-11
+- Confirmed directly in Discord web that Oracle guild `565501940742619145` is `sstar` and routed channel `565501941510045707` is `#general`.
+- Discord application `OpenClaw Engineer` now exists with application id `1481122055184187432`.
+- `OpenClaw Engineer` bot configuration has been updated in the Discord Developer Portal with:
+  - `Server Members Intent = enabled`
+  - `Message Content Intent = enabled`
+  - baseline permissions integer `117824`
+- `OpenClaw Engineer` invite flow to `sstar` was started but is currently blocked on a manual hCaptcha challenge before final authorization.
+- `OpenClaw Researcher` creation was started but is also blocked on a manual hCaptcha challenge.
+- Upstream `openclaw/openclaw` `main` still documents and types the Discord multi-account path through `channels.discord.accounts`, `channels.discord.defaultAccount`, and binding-level `match.accountId`.
+- Oracle has not yet been switched from the current single-account Discord config in this session.
