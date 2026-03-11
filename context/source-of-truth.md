@@ -31,6 +31,7 @@ These files may exist on the host and are useful for audits/snapshots, but they 
 - `~/.openclaw/logs/*`, `~/.openclaw/memory/*`, `~/.openclaw/subagents/*`: runtime history and caches.
 - `~/.openclaw/identity/*`: host identity/runtime device state.
 - `~/.openclaw/workspace*/.openclaw/workspace-state.json`: local workspace runtime state.
+- `~/.openclaw/workspace-engineer/.openclaw/{gh,bin/gh}`: local engineer-only GitHub CLI auth/materialized helper binary for sandbox binds.
 - `~/.openclaw/exec-approvals.json`, `~/.openclaw/sandbox/containers.json`, `~/.openclaw/devices/*`: live operational state that may drift.
 
 ## Fresh-host rebuild workflow

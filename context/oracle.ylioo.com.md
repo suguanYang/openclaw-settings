@@ -49,6 +49,12 @@ Last verified: 2026-03-11 UTC
 - `~/.codex/config.toml` was removed from the host on 2026-03-09 when Codex ACP was disabled.
 - `~/.claude/settings.json` is present and currently pins `claude-sonnet-4-5-20250929`.
 - `scripts/oracle-openclaw.sh runtime-exec` now sources `~/.openclaw/acp-harness.env` so local smoke checks use the same extra env as the real gateway process.
+- Engineer-only GitHub CLI sandbox binds now live under `~/.openclaw/workspace-engineer/.openclaw/{gh,bin/gh}`; the global sandbox defaults keep `docker.binds=[]`.
+- Preferred engineer smoke test:
+  - `./scripts/oracle-openclaw.sh runtime-exec 'run_openclaw agent --agent engineer --message "Reply with exactly: engineer ok" --json'`
+- 2026-03-11 engineer re-test result:
+  - the earlier bind-mount sandbox rejection is gone;
+  - the current failure is upstream model-provider availability: `HTTP 503 new_api_error: No available channel for model claude-sonnet-4-6 under group cc逆向 (distributor)`.
 - Current ACP smoke status:
   - Re-test at 2026-03-09T08:21Z showed the raw Anthropic-compatible endpoint is currently healthy again:
     - `GET https://api.ikuncode.cc/v1/models` returned `200`

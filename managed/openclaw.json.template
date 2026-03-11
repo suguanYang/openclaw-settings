@@ -190,11 +190,7 @@
             "npm_config_nodedir": "/usr"
           },
           "setupCommand": "(git config --global credential.https://github.com.helper \"!gh auth git-credential\" || true) && (sudo -n true >/dev/null 2>&1 || (printf \"#!/usr/bin/env bash\\nexec \\\"\\$@\\\"\\n\" > /usr/local/bin/sudo && chmod +x /usr/local/bin/sudo))",
-          "binds": [
-            "__OPENCLAW_GH_CONFIG_BIND_ROOT__:/root/.config/gh:rw",
-            "__OPENCLAW_GH_CONFIG_BIND_ROOT__:/home/__OPENCLAW_HOST_USER__/.config/gh:rw",
-            "__OPENCLAW_GH_BIN_HOST_PATH__:/usr/local/bin/gh:ro"
-          ]
+          "binds": []
         }
       }
     },
@@ -260,7 +256,14 @@
         "sandbox": {
           "mode": "all",
           "workspaceAccess": "rw",
-          "scope": "agent"
+          "scope": "agent",
+          "docker": {
+            "binds": [
+              "__OPENCLAW_GH_CONFIG_BIND_ROOT__:/root/.config/gh:rw",
+              "__OPENCLAW_GH_CONFIG_BIND_ROOT__:/home/__OPENCLAW_HOST_USER__/.config/gh:rw",
+              "__OPENCLAW_GH_BIN_HOST_PATH__:/usr/local/bin/gh:ro"
+            ]
+          }
         }
       },
       {
