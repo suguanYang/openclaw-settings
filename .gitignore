@@ -5,6 +5,7 @@
 
 # Runtime scratch
 .tmp/
+.secrets/
 
 # If you ever place raw exports here, keep them out of git
 *.raw.json

@@ -8,14 +8,16 @@ Replace the current single-bot + internal-agent Discord setup with real Discord 
 ## Current state
 - Oracle currently has one Discord bot account configured in `channels.discord.token`.
 - Internal OpenClaw agents exist for `research-lead`, `engineer`, `researcher`, `reporter`, and `tracker`.
-- Real Discord member mentions are almost ready: all 5 target bot applications now exist, and 4 of the 5 are fully invited into `sstar`.
-- Completed bot/member state:
-  - `OpenClaw Manager` exists and is already in `sstar`.
-  - `OpenClaw Engineer` exists and is already in `sstar`.
-  - `OpenClaw Researcher` exists and is already in `sstar`.
-  - `OpenClaw Reporter` exists and is already in `sstar`.
-- Pending bot/member state:
-  - `OpenClaw Tracker` exists and is configured, but the final invite authorize step is blocked by Discord hCaptcha.
+- All 5 target bot applications now exist and all 5 are already invited into `sstar`.
+- Invite/member state:
+  - `OpenClaw Manager` is in `sstar`.
+  - `OpenClaw Engineer` is in `sstar`.
+  - `OpenClaw Researcher` is in `sstar`.
+  - `OpenClaw Reporter` is in `sstar`.
+  - `OpenClaw Tracker` is in `sstar`.
+- Token capture state for Oracle cutover:
+  - local gitignored capture completed for manager, researcher, reporter, and tracker
+  - engineer token reset is in progress and currently blocked by Discord account 2FA
 
 ## Fastest migration path
 Reuse the current existing Discord bot as the manager account, then create 4 new Discord bots.
