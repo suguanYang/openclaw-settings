@@ -3,96 +3,76 @@ set -euo pipefail
 shopt -s nullglob
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-OUT="$ROOT/snapshots"
 TMP="$ROOT/.tmp/snapshot.$$"
 SRC_STAGE="$TMP/src"
 
 # Optional: set OPENCLAW_SNAPSHOT_HOST to capture from a remote host over SSH.
 HOST="${OPENCLAW_SNAPSHOT_HOST:-}"
+BUILD_ID="${HOST:-local}"
+OUT_BASE="$ROOT/build/$BUILD_ID"
+ROOTFS_OUT="$OUT_BASE/rootfs"
 
-mkdir -p "$OUT" "$ROOT/.tmp" "$SRC_STAGE"
+mkdir -p "$OUT_BASE" "$ROOT/.tmp" "$SRC_STAGE"
 trap 'rm -rf "$TMP"' EXIT
 
-collect_local() {
+copy_local_file() {
+  local abs="$1"
+  local rel
+  [ -f "$abs" ] || return 0
+  rel="${abs#/}"
+  mkdir -p "$SRC_STAGE/$(dirname "$rel")"
+  cp "$abs" "$SRC_STAGE/$rel"
+}
+
+collect_openclaw_tree_local() {
   local base="$1"
   [ -d "$base" ] || return 0
 
-  copy_if_exists() {
-    local rel="$1"
-    if [ -f "$base/$rel" ]; then
-      mkdir -p "$SRC_STAGE/$(dirname "$rel")"
-      cp "$base/$rel" "$SRC_STAGE/$rel"
-    fi
-  }
+  copy_local_file "$base/openclaw.json"
+  copy_local_file "$base/exec-approvals.json"
+  copy_local_file "$base/sandbox/containers.json"
+  copy_local_file "$base/cron/jobs.json"
+  copy_local_file "$base/cron/jobs.json.bak"
+  copy_local_file "$base/acp-harness.env"
+  copy_local_file "$base/discord/model-picker-preferences.json"
+  copy_local_file "$base/discord/thread-bindings.json"
+  copy_local_file "$base/devices/paired.json"
+  copy_local_file "$base/devices/pending.json"
 
-  copy_if_exists "openclaw.json"
-  copy_if_exists "exec-approvals.json"
-  copy_if_exists "sandbox/containers.json"
-  copy_if_exists "cron/jobs.json"
-  copy_if_exists "cron/jobs.json.bak"
-  copy_if_exists "acp-harness.env"
-  copy_if_exists "discord/model-picker-preferences.json"
-  copy_if_exists "discord/thread-bindings.json"
-  copy_if_exists "devices/paired.json"
-  copy_if_exists "devices/pending.json"
-
+  local workspace_dir
+  local f
   for workspace_dir in "$base"/workspace "$base"/workspace-*; do
     [ -d "$workspace_dir" ] || continue
-    workspace_rel="${workspace_dir#$base/}"
     for f in "$workspace_dir"/*.md; do
       [ -f "$f" ] || continue
-      rel="${f#$base/}"
-      mkdir -p "$SRC_STAGE/$(dirname "$rel")"
-      cp "$f" "$SRC_STAGE/$rel"
+      copy_local_file "$f"
     done
     for f in "$workspace_dir"/skills/*/SKILL.md; do
       [ -f "$f" ] || continue
-      rel="${f#$base/}"
-      mkdir -p "$SRC_STAGE/$(dirname "$rel")"
-      cp "$f" "$SRC_STAGE/$rel"
+      copy_local_file "$f"
     done
   done
 
   for f in "$base"/openclaw.json.bak*; do
     [ -f "$f" ] || continue
-    rel="${f#$base/}"
-    mkdir -p "$SRC_STAGE/$(dirname "$rel")"
-    cp "$f" "$SRC_STAGE/$rel"
+    copy_local_file "$f"
   done
 
   for f in "$base"/skills/*/SKILL.md; do
     [ -f "$f" ] || continue
-    rel="${f#$base/}"
-    mkdir -p "$SRC_STAGE/$(dirname "$rel")"
-    cp "$f" "$SRC_STAGE/$rel"
+    copy_local_file "$f"
   done
+}
 
-  if [ -f "$HOME/.acpx/config.json" ]; then
-    mkdir -p "$SRC_STAGE/acpx"
-    cp "$HOME/.acpx/config.json" "$SRC_STAGE/acpx/config.json"
-  fi
+collect_local() {
+  local base="${OPENCLAW_HOME:-$HOME/.openclaw}"
 
-  if [ -f "$HOME/.codex/config.toml" ]; then
-    mkdir -p "$SRC_STAGE/codex"
-    cp "$HOME/.codex/config.toml" "$SRC_STAGE/codex/config.toml"
-  fi
-
-  if [ -f "$HOME/.claude/settings.json" ]; then
-    mkdir -p "$SRC_STAGE/claude"
-    cp "$HOME/.claude/settings.json" "$SRC_STAGE/claude/settings.json"
-  fi
-
-  if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service" ]; then
-    mkdir -p "$SRC_STAGE/systemd"
-    cp "$HOME/.config/systemd/user/openclaw-gateway.service" "$SRC_STAGE/systemd/openclaw-gateway.service"
-  fi
-
-  if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf" ]; then
-    mkdir -p "$SRC_STAGE/systemd/openclaw-gateway.service.d"
-    cp \
-      "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf" \
-      "$SRC_STAGE/systemd/openclaw-gateway.service.d/acp-harness.conf"
-  fi
+  collect_openclaw_tree_local "$base"
+  copy_local_file "$HOME/.acpx/config.json"
+  copy_local_file "$HOME/.codex/config.toml"
+  copy_local_file "$HOME/.claude/settings.json"
+  copy_local_file "$HOME/.config/systemd/user/openclaw-gateway.service"
+  copy_local_file "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf"
 }
 
 collect_remote() {
@@ -100,69 +80,55 @@ collect_remote() {
   ssh "$host" 'bash -s' <<'REMOTE' | tar -xf - -C "$SRC_STAGE"
 set -euo pipefail
 shopt -s nullglob
+
 base="${OPENCLAW_HOME:-$HOME/.openclaw}"
-cd "$base"
 paths=()
 
 add_file() {
   local p="$1"
-  [ -f "$p" ] && paths+=("$p")
+  [ -f "$p" ] && paths+=("${p#/}")
 }
 
-add_file "openclaw.json"
-add_file "exec-approvals.json"
-add_file "sandbox/containers.json"
-add_file "cron/jobs.json"
-add_file "cron/jobs.json.bak"
-add_file "acp-harness.env"
-add_file "discord/model-picker-preferences.json"
-add_file "discord/thread-bindings.json"
-add_file "devices/paired.json"
-add_file "devices/pending.json"
+add_file "$base/openclaw.json"
+add_file "$base/exec-approvals.json"
+add_file "$base/sandbox/containers.json"
+add_file "$base/cron/jobs.json"
+add_file "$base/cron/jobs.json.bak"
+add_file "$base/acp-harness.env"
+add_file "$base/discord/model-picker-preferences.json"
+add_file "$base/discord/thread-bindings.json"
+add_file "$base/devices/paired.json"
+add_file "$base/devices/pending.json"
 
-for workspace_dir in workspace workspace-*; do
+for workspace_dir in "$base"/workspace "$base"/workspace-*; do
   [ -d "$workspace_dir" ] || continue
   for f in "$workspace_dir"/*.md; do
-    [ -f "$f" ] && paths+=("$f")
+    [ -f "$f" ] && paths+=("${f#/}")
   done
   for f in "$workspace_dir"/skills/*/SKILL.md; do
-    [ -f "$f" ] && paths+=("$f")
+    [ -f "$f" ] && paths+=("${f#/}")
   done
 done
 
-for f in openclaw.json.bak*; do
-  [ -f "$f" ] && paths+=("$f")
+for f in "$base"/openclaw.json.bak*; do
+  [ -f "$f" ] && paths+=("${f#/}")
 done
 
-for f in skills/*/SKILL.md; do
-  [ -f "$f" ] && paths+=("$f")
+for f in "$base"/skills/*/SKILL.md; do
+  [ -f "$f" ] && paths+=("${f#/}")
 done
 
-if [ -f "$HOME/.acpx/config.json" ]; then
-  paths+=("$HOME/.acpx/config.json")
-fi
-
-if [ -f "$HOME/.codex/config.toml" ]; then
-  paths+=("$HOME/.codex/config.toml")
-fi
-
-if [ -f "$HOME/.claude/settings.json" ]; then
-  paths+=("$HOME/.claude/settings.json")
-fi
-
-if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service" ]; then
-  paths+=("$HOME/.config/systemd/user/openclaw-gateway.service")
-fi
-
-if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf" ]; then
-  paths+=("$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf")
-fi
+add_file "$HOME/.acpx/config.json"
+add_file "$HOME/.codex/config.toml"
+add_file "$HOME/.claude/settings.json"
+add_file "$HOME/.config/systemd/user/openclaw-gateway.service"
+add_file "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf"
 
 if [ "${#paths[@]}" -eq 0 ]; then
   exit 0
 fi
 
-tar -cf - "${paths[@]}"
+tar -C / -cf - "${paths[@]}"
 REMOTE
 }
 
@@ -170,20 +136,23 @@ if [ -n "$HOST" ]; then
   collect_remote "$HOST"
   SOURCE_ID="$HOST"
 else
-  collect_local "${OPENCLAW_HOME:-$HOME/.openclaw}"
+  collect_local
   SOURCE_ID="local"
 fi
 
-python3 - "$SRC_STAGE" "$OUT" "$SOURCE_ID" <<'PY'
+python3 - "$SRC_STAGE" "$OUT_BASE" "$SOURCE_ID" "$ROOT" <<'PY'
 import json
 import re
+import shutil
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 src_root = Path(sys.argv[1])
-out_root = Path(sys.argv[2])
+out_base = Path(sys.argv[2])
 source_id = sys.argv[3]
+root = Path(sys.argv[4])
+rootfs_out = out_base / "rootfs"
 
 SENSITIVE_KEY_NAMES = (
     "api_key",
@@ -219,12 +188,14 @@ LINE_SECRET_PATTERN = re.compile(
     r"(?i)\b(api[_-]?key|token|secret|password|authorization|cookie)\b\s*[:=]\s*([^\s]+)"
 )
 
+
 def redact_string(value: str) -> str:
     redacted = value
     for pattern in STRING_PATTERNS:
         redacted = pattern.sub("<redacted>", redacted)
     redacted = LINE_SECRET_PATTERN.sub(lambda m: f"{m.group(1)}=<redacted>", redacted)
     return redacted
+
 
 def normalize_key(key: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower().replace("-", "_")
@@ -237,6 +208,7 @@ def is_sensitive_key(key: str) -> bool:
     if normalized in SENSITIVE_KEY_NAMES:
         return True
     return any(part in SENSITIVE_KEY_PARTS for part in normalized.split("_") if part)
+
 
 def redact_json(value):
     if isinstance(value, dict):
@@ -253,9 +225,15 @@ def redact_json(value):
         return redact_string(value)
     return value
 
+
 def write_json(path: Path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+
+
+if rootfs_out.exists():
+    shutil.rmtree(rootfs_out)
+rootfs_out.mkdir(parents=True, exist_ok=True)
 
 written = []
 for src_file in sorted(src_root.rglob("*")):
@@ -263,31 +241,7 @@ for src_file in sorted(src_root.rglob("*")):
         continue
 
     rel = src_file.relative_to(src_root)
-    if str(rel).startswith("home/"):
-        parts = rel.parts
-        if len(parts) >= 4 and parts[2] == ".acpx" and parts[3] == "config.json":
-            rel = Path("acpx/config.json")
-        elif len(parts) >= 4 and parts[2] == ".codex" and parts[3] == "config.toml":
-            rel = Path("codex/config.toml")
-        elif len(parts) >= 4 and parts[2] == ".claude" and parts[3] == "settings.json":
-            rel = Path("claude/settings.json")
-        elif (
-            len(parts) >= 6
-            and parts[2] == ".config"
-            and parts[3] == "systemd"
-            and parts[4] == "user"
-            and parts[5] == "openclaw-gateway.service"
-        ):
-            rel = Path("systemd/openclaw-gateway.service")
-        elif (
-            len(parts) >= 7
-            and parts[2] == ".config"
-            and parts[3] == "systemd"
-            and parts[4] == "user"
-            and parts[5] == "openclaw-gateway.service.d"
-        ):
-            rel = Path("systemd/openclaw-gateway.service.d") / parts[-1]
-    out_file = out_root / rel
+    out_file = rootfs_out / rel
     out_file.parent.mkdir(parents=True, exist_ok=True)
 
     text = src_file.read_text(encoding="utf-8", errors="replace")
@@ -299,28 +253,59 @@ for src_file in sorted(src_root.rglob("*")):
             out_file.write_text(redact_string(text), encoding="utf-8")
     else:
         out_file.write_text(redact_string(text), encoding="utf-8")
-    written.append(str(rel))
 
-expected = set(written)
-expected.add("_meta.json")
-for existing in sorted(out_root.rglob("*"), reverse=True):
-    if existing.is_file():
-        rel = str(existing.relative_to(out_root))
-        if rel not in expected:
-            existing.unlink()
-    elif existing.is_dir():
-        try:
-            existing.rmdir()
-        except OSError:
-            pass
+    written.append(
+        {
+            "hostPath": "/" + rel.as_posix(),
+            "buildPath": str(out_file.relative_to(out_base)),
+            "sourcePath": "/" + rel.as_posix(),
+            "mode": "live-capture",
+        }
+    )
 
-meta = {
+
+profile_path = root / "profiles" / f"{source_id}.env"
+secrets_contract = root / "managed" / "secrets.example.env"
+openclaw_dirs = sorted(rootfs_out.glob("home/*/.openclaw"))
+
+if profile_path.exists() and secrets_contract.exists() and openclaw_dirs:
+    openclaw_dir = openclaw_dirs[0]
+    env_target = openclaw_dir / ".env"
+    env_target.write_text(
+        "\n".join(
+            [
+                "# Repo-safe generated .env for the build mirror",
+                f"# Host: {source_id}",
+                f"# Profile source: {profile_path.relative_to(root)}",
+                f"# Secrets source: {secrets_contract.relative_to(root)}",
+                "# Variable names and paths match the host layout, but secret values stay blank in git.",
+                profile_path.read_text(encoding="utf-8").rstrip(),
+                "",
+                secrets_contract.read_text(encoding="utf-8").rstrip(),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    written.append(
+        {
+            "hostPath": "/" + str(env_target.relative_to(rootfs_out)).replace("\\", "/"),
+            "buildPath": str(env_target.relative_to(out_base)),
+            "sourcePath": f"{profile_path.relative_to(root)} + {secrets_contract.relative_to(root)}",
+            "mode": "generated-env:example",
+        }
+    )
+
+
+manifest = {
     "capturedAtUtc": datetime.now(timezone.utc).isoformat(),
     "source": source_id,
+    "profile": str(profile_path.relative_to(root)) if profile_path.exists() else None,
+    "secretsContract": str(secrets_contract.relative_to(root)) if secrets_contract.exists() else None,
     "fileCount": len(written),
     "files": written,
 }
-write_json(out_root / "_meta.json", meta)
+write_json(out_base / "manifest.json", manifest)
 PY
 
-echo "snapshot updated in $OUT"
+echo "build mirror updated in $OUT_BASE"

@@ -1,0 +1,315 @@
+{
+  "capturedAtUtc": "2026-03-11T14:57:26.820155+00:00",
+  "source": "oracle.ylioo.com",
+  "profile": "profiles/oracle.ylioo.com.env",
+  "secretsContract": "managed/secrets.example.env",
+  "fileCount": 51,
+  "files": [
+    {
+      "hostPath": "/home/suguan/.claude/settings.json",
+      "buildPath": "rootfs/home/suguan/.claude/settings.json",
+      "sourcePath": "/home/suguan/.claude/settings.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.config/systemd/user/openclaw-gateway.service",
+      "buildPath": "rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service",
+      "sourcePath": "/home/suguan/.config/systemd/user/openclaw-gateway.service",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf",
+      "buildPath": "rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf",
+      "sourcePath": "/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/.env",
+      "buildPath": "rootfs/home/suguan/.openclaw/.env",
+      "sourcePath": "profiles/oracle.ylioo.com.env + managed/secrets.example.env",
+      "mode": "generated-env:example"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/acp-harness.env",
+      "buildPath": "rootfs/home/suguan/.openclaw/acp-harness.env",
+      "sourcePath": "/home/suguan/.openclaw/acp-harness.env",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/cron/jobs.json",
+      "buildPath": "rootfs/home/suguan/.openclaw/cron/jobs.json",
+      "sourcePath": "/home/suguan/.openclaw/cron/jobs.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/cron/jobs.json.bak",
+      "buildPath": "rootfs/home/suguan/.openclaw/cron/jobs.json.bak",
+      "sourcePath": "/home/suguan/.openclaw/cron/jobs.json.bak",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/devices/paired.json",
+      "buildPath": "rootfs/home/suguan/.openclaw/devices/paired.json",
+      "sourcePath": "/home/suguan/.openclaw/devices/paired.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/devices/pending.json",
+      "buildPath": "rootfs/home/suguan/.openclaw/devices/pending.json",
+      "sourcePath": "/home/suguan/.openclaw/devices/pending.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/discord/model-picker-preferences.json",
+      "buildPath": "rootfs/home/suguan/.openclaw/discord/model-picker-preferences.json",
+      "sourcePath": "/home/suguan/.openclaw/discord/model-picker-preferences.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/discord/thread-bindings.json",
+      "buildPath": "rootfs/home/suguan/.openclaw/discord/thread-bindings.json",
+      "sourcePath": "/home/suguan/.openclaw/discord/thread-bindings.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/exec-approvals.json",
+      "buildPath": "rootfs/home/suguan/.openclaw/exec-approvals.json",
+      "sourcePath": "/home/suguan/.openclaw/exec-approvals.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/openclaw.json",
+      "buildPath": "rootfs/home/suguan/.openclaw/openclaw.json",
+      "sourcePath": "/home/suguan/.openclaw/openclaw.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/openclaw.json.bak",
+      "buildPath": "rootfs/home/suguan/.openclaw/openclaw.json.bak",
+      "sourcePath": "/home/suguan/.openclaw/openclaw.json.bak",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/openclaw.json.bak.1",
+      "buildPath": "rootfs/home/suguan/.openclaw/openclaw.json.bak.1",
+      "sourcePath": "/home/suguan/.openclaw/openclaw.json.bak.1",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/openclaw.json.bak.2",
+      "buildPath": "rootfs/home/suguan/.openclaw/openclaw.json.bak.2",
+      "sourcePath": "/home/suguan/.openclaw/openclaw.json.bak.2",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/openclaw.json.bak.3",
+      "buildPath": "rootfs/home/suguan/.openclaw/openclaw.json.bak.3",
+      "sourcePath": "/home/suguan/.openclaw/openclaw.json.bak.3",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/openclaw.json.bak.4",
+      "buildPath": "rootfs/home/suguan/.openclaw/openclaw.json.bak.4",
+      "sourcePath": "/home/suguan/.openclaw/openclaw.json.bak.4",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/sandbox/containers.json",
+      "buildPath": "rootfs/home/suguan/.openclaw/sandbox/containers.json",
+      "sourcePath": "/home/suguan/.openclaw/sandbox/containers.json",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/skills/deep-research/SKILL.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/skills/deep-research/SKILL.md",
+      "sourcePath": "/home/suguan/.openclaw/skills/deep-research/SKILL.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/skills/github-repo-change/SKILL.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/skills/github-repo-change/SKILL.md",
+      "sourcePath": "/home/suguan/.openclaw/skills/github-repo-change/SKILL.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/AGENTS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/AGENTS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/AGENTS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/BOOTSTRAP.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/BOOTSTRAP.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/BOOTSTRAP.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/HEARTBEAT.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/HEARTBEAT.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/HEARTBEAT.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/IDENTITY.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/IDENTITY.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/IDENTITY.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/SOUL.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/SOUL.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/SOUL.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/TOOLS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/TOOLS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/TOOLS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/USER.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/USER.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/USER.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/skills/deep-research/SKILL.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/skills/deep-research/SKILL.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/skills/deep-research/SKILL.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace/skills/github-repo-change/SKILL.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace/skills/github-repo-change/SKILL.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace/skills/github-repo-change/SKILL.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-engineer/AGENTS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-engineer/AGENTS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-engineer/AGENTS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-engineer/BOOTSTRAP.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-engineer/BOOTSTRAP.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-engineer/BOOTSTRAP.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-engineer/HEARTBEAT.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-engineer/HEARTBEAT.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-engineer/HEARTBEAT.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-engineer/IDENTITY.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-engineer/IDENTITY.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-engineer/IDENTITY.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-engineer/SOUL.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-engineer/SOUL.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-engineer/SOUL.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-engineer/TOOLS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-engineer/TOOLS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-engineer/TOOLS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-engineer/USER.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-engineer/USER.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-engineer/USER.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-reporter/AGENTS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-reporter/AGENTS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-reporter/AGENTS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/ACP.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/ACP.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/ACP.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/AGENTS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/AGENTS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/AGENTS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/BOOTSTRAP.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/BOOTSTRAP.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/BOOTSTRAP.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/HEARTBEAT.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/HEARTBEAT.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/HEARTBEAT.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/IDENTITY.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/IDENTITY.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/IDENTITY.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/ISSUES.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/ISSUES.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/ISSUES.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/SOUL.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/SOUL.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/SOUL.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/STATUS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/STATUS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/STATUS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/TEAM.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/TEAM.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/TEAM.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/TOOLS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/TOOLS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/TOOLS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-research-lead/USER.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-research-lead/USER.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-research-lead/USER.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-researcher/AGENTS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-researcher/AGENTS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-researcher/AGENTS.md",
+      "mode": "live-capture"
+    },
+    {
+      "hostPath": "/home/suguan/.openclaw/workspace-tracker/AGENTS.md",
+      "buildPath": "rootfs/home/suguan/.openclaw/workspace-tracker/AGENTS.md",
+      "sourcePath": "/home/suguan/.openclaw/workspace-tracker/AGENTS.md",
+      "mode": "live-capture"
+    }
+  ]
+}

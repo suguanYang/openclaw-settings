@@ -1,0 +1,28 @@
+{
+  "entries": [
+    {
+      "configHash": "4ca7ddd5b803cbf513660dc4300ed9a75d512fed91f42ea74540ef1d09b19285",
+      "containerName": "openclaw-sbx-agent-engineer-f756b04c",
+      "createdAtMs": 1773225812764,
+      "image": "openclaw-sandbox:ubuntu-24.04-full",
+      "lastUsedAtMs": 1773228715458,
+      "sessionKey": "agent:engineer"
+    },
+    {
+      "configHash": "0c82178afafe634f05f1656f30a7e90504a58b0d27feab7939cdde2aa3a70c66",
+      "containerName": "openclaw-sbx-agent-researcher-d2f02e1f",
+      "createdAtMs": 1773231526972,
+      "image": "openclaw-sandbox:ubuntu-24.04-full",
+      "lastUsedAtMs": 1773231895913,
+      "sessionKey": "agent:researcher"
+    },
+    {
+      "configHash": "0c82178afafe634f05f1656f30a7e90504a58b0d27feab7939cdde2aa3a70c66",
+      "containerName": "openclaw-sbx-agent-tracker-87065183",
+      "createdAtMs": 1773231527675,
+      "image": "openclaw-sandbox:ubuntu-24.04-full",
+      "lastUsedAtMs": 1773231896560,
+      "sessionKey": "agent:tracker"
+    }
+  ]
+}

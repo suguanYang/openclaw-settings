@@ -84,8 +84,8 @@ Rules:
 - Discord cutover helper: `scripts/oracle-discord-cutover.sh`
 - Managed manager prompt: `managed/workspace-research-lead/AGENTS.md`
 - Managed ACP note: `managed/workspace-research-lead/ACP.md`
-- Live snapshot prompt: `snapshots/workspace-research-lead/AGENTS.md`
-- Live snapshot config: `snapshots/openclaw.json`
+- Live build prompt: `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/workspace-research-lead/AGENTS.md`
+- Live build config: `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/openclaw.json`
 - Oracle operation log: `../../../../operation-logs/2026-03-11-oracle.ylioo.com.md`
 
 ## How to maintain it

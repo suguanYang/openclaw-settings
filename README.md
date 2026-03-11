@@ -15,13 +15,13 @@ Read the repo from broad to narrow:
 3. `context/architecture/`: repo-wide state model and structural rules.
 4. `context/hosts/<host>/`: host dossiers, runbooks, projects, and repair notes.
 5. `context/design/`: future function proposals and accepted design decisions.
-6. `operation-logs/` and `snapshots/`: exact evidence and current redacted live state.
+6. `operation-logs/` and `build/`: exact evidence and the current path-faithful live mirror.
 
 ## Repo layout
+- `build/`: path-faithful host build mirrors plus step-by-step rebuild books.
 - `managed/`: authoritative desired state for rebuilds.
 - `profiles/`: tracked non-secret host values such as paths, ports, IDs, and origins.
 - `.secrets/`: gitignored secret env files.
-- `snapshots/`: redacted mirrors of the live host state.
 - `operation-logs/`: append-only server interaction logs.
 - `context/architecture/`: repo-wide model and source-of-truth boundary.
 - `context/hosts/`: per-host dossiers with small, focused docs.
@@ -50,10 +50,16 @@ Read the repo from broad to narrow:
 ## Redaction and secrets
 - Never commit plaintext secrets.
 - `managed/` and `profiles/` are tracked; `.secrets/` is local only.
-- `snapshots/` and `operation-logs/` must contain only redacted values.
+- `build/` and `operation-logs/` must contain only redacted or placeholder-safe values.
 
 ## State model
 The rebuild boundary is documented in `context/architecture/source-of-truth.md`.
+
+## Build mirrors
+- `build/` is the host-path-oriented view.
+- It mirrors files into exact host-style paths under `build/<host>/rootfs/`.
+- It is refreshed from the live host capture plus the local profile and secret contract, so it is convenient for inspection and step-by-step rebuilds but is not the primary source of truth.
+- Refresh it with `./scripts/oracle-openclaw.sh snapshot` or `OPENCLAW_SNAPSHOT_HOST=<ssh-host> ./scripts/snapshot.sh`.
 
 ## Documentation update rules
 - Live host behavior changed: update `operation-logs/` plus the smallest relevant file under `context/hosts/<host>/`.
@@ -62,4 +68,4 @@ The rebuild boundary is documented in `context/architecture/source-of-truth.md`.
 
 ## Current coverage
 - As of 2026-03-11 UTC, `managed/` + `profiles/oracle.ylioo.com.env` + local `.secrets/oracle.ylioo.com.env` are sufficient to recreate the current Oracle OpenClaw deployment without reading the live host config by hand.
-- Snapshot-only files under `snapshots/` are runtime or generated state such as thread bindings, device state, exec approvals, backups, and the generated systemd service.
+- Build-mirror-only files under `build/oracle.ylioo.com/rootfs/` include runtime or generated state such as thread bindings, device state, exec approvals, backups, and the generated systemd service.

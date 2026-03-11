@@ -8,14 +8,14 @@ This directory is the structured knowledge layer for the repo. It exists so oper
 3. `hosts/README.md`
 4. `hosts/<host>/runbooks/` or `hosts/<host>/projects/`
 5. `operation-logs/`
-6. `snapshots/`
+6. `../build/`
 
 ## Storage rules
 - `architecture/`: repo-wide rules, boundaries, and state model.
 - `hosts/`: host-specific facts, live behavior, rebuild notes, and repair history.
 - `design/`: future-facing function design and accepted decisions.
 - `operation-logs/`: append-only evidence of exact interventions.
-- `snapshots/`: redacted live mirror when exact current files matter.
+- `build/`: redacted path-faithful live mirror when exact current files matter.
 
 ## Writing rules
 - Keep one concern per file.

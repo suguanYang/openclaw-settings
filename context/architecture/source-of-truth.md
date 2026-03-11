@@ -8,6 +8,11 @@ Make this repo sufficient to rebuild the managed OpenClaw deployment on a fresh 
 - OpenClaw product behavior is not defined by this repo.
 - OpenClaw is an open-source upstream project that changes frequently, so generic behavior, config semantics, and feature support should be verified against `https://docs.openclaw.ai` and `https://github.com/openclaw/openclaw`.
 
+## Derived build mirror
+- `build/` is a derived convenience layer.
+- It mirrors the current host layout into exact host-style paths for inspection and rebuild walkthroughs.
+- It is refreshed from live host capture plus `profiles/` and the secrets contract, so it should not replace `managed/` as the authoritative rebuild source.
+
 ## Authoritative tracked state
 - `managed/openclaw.json.template`: desired OpenClaw config with tracked `__PROFILE_VAR__` placeholders and env-backed secret placeholders like `${ANTHROPIC_API_KEY}`.
 - `managed/acp-harness.env.template`: desired ACP bridge env file rendered locally before upload.
@@ -49,10 +54,11 @@ These files may exist on the host and are useful for audits/snapshots, but they 
 
 ## Coverage status
 - As of 2026-03-11 UTC, the Oracle deployment's declarative settings are captured in `managed/`, `profiles/oracle.ylioo.com.env`, and the local-only `.secrets/oracle.ylioo.com.env`.
-- Live task boards such as `snapshots/workspace-research-lead/{STATUS,ISSUES}.md` may intentionally drift from the neutral `managed/` baselines after the team starts working.
-- Remaining snapshot-only files are runtime or generated state and are intentionally excluded from fresh-host rebuild inputs.
+- Live task boards such as `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/workspace-research-lead/{STATUS,ISSUES}.md` may intentionally drift from the neutral `managed/` baselines after the team starts working.
+- Remaining build-mirror-only files are runtime or generated state and are intentionally excluded from fresh-host rebuild inputs.
 
 ## Audit policy
 - Every server interaction should be recorded in `operation-logs/`.
-- `snapshots/` remains the redacted live mirror.
+- `build/` remains the redacted path-faithful live mirror.
 - `managed/` + `profiles/` is the declarative rebuild layer.
+- `build/` is the path-faithful operator view.
