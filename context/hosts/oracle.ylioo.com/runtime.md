@@ -11,7 +11,7 @@ Last verified: 2026-03-11 UTC
 - Observed service port: `18789`
 - ExecStart node: `/home/suguan/.nvm/versions/node/v22.18.0/bin/node`
 - ExecStart entrypoint: `/home/suguan/.local/share/pnpm/global/5/.pnpm/openclaw@2026.3.8_.../node_modules/openclaw/dist/index.js`
-- Shell PATH caveat: non-interactive `zsh -lc` does not resolve `openclaw`, `node`, `npm`, or `pnpm`; use absolute paths or `scripts/oracle-openclaw.sh`.
+- Shell PATH caveat: non-interactive `zsh -lc` does not resolve `openclaw`, `node`, `npm`, `pnpm`, or `gh`; use absolute paths or `scripts/oracle-openclaw.sh`.
 - PNPM caveat: global writes require `PNPM_HOME=/home/suguan/.local/share/pnpm`.
 
 ## Related docs
@@ -29,7 +29,7 @@ Last verified: 2026-03-11 UTC
   - `researcher` -> `researcher`
   - `reporter` -> `reporter`
   - `tracker` -> `tracker`
-- `requireMention=true` is enabled for the guild, so the team should stay silent unless one of the bot members is explicitly mentioned.
+- `requireMention=true` and `ignoreOtherMentions=true` are enabled for the guild, so the team should stay silent unless one of the bot members is explicitly mentioned.
 - Confirmed in the live Discord UI on 2026-03-11 that all 5 real bot members are present in `sstar`:
   - `OpenClaw Manager`
   - `OpenClaw Engineer`
@@ -56,7 +56,14 @@ Last verified: 2026-03-11 UTC
 - `scripts/oracle-openclaw.sh runtime-exec` now sources `~/.openclaw/acp-harness.env` so local smoke checks use the same extra env as the real gateway process.
 - Global sandbox defaults keep `docker.binds=[]`.
 - The earlier engineer-only GitHub CLI bind-mount workaround was removed from the normal engineer agent path on 2026-03-11 because it blocked manager-spawned engineer subagents.
-- For heavier repo or GitHub-auth work, prefer Claude ACP threads instead of relying on GitHub CLI inside the normal engineer sandbox.
+- All 5 normal team agents now share the same basic tool baseline:
+  - browser enabled through the bundled Playwright/Chromium path
+  - `tools.exec.host = gateway` with `ask = off`
+  - `tools.fs.workspaceOnly = false`
+  - no per-agent `exec` deny blocks remain
+- The live `~/.openclaw/exec-approvals.json` currently has empty `defaults` and `agents` maps, so the `gateway` exec baseline is controlled by `openclaw.json` rather than extra per-agent approval rules.
+- Raw helper-shell commands such as `./scripts/oracle-openclaw.sh exec "gh ..."` still hit the non-interactive PATH caveat; the normal agent `exec` tool path does resolve `gh` correctly on this host.
+- For heavier repo work, multi-step coding, or GitHub-auth-sensitive flows, prefer Claude ACP threads over ad hoc normal-agent shell usage.
 - Preferred engineer smoke test:
   - `./scripts/oracle-openclaw.sh runtime-exec 'run_openclaw agent --agent engineer --message "Reply with exactly: engineer ok" --json'`
 - 2026-03-11 engineer re-test result:
@@ -80,5 +87,7 @@ Last verified: 2026-03-11 UTC
 - `research-lead` is configured to auto-delegate substantial tasks to `researcher`, `engineer`, `reporter`, and `tracker` instead of waiting for explicit teammate mentions.
 - Mentioning `OpenClaw Engineer`, `OpenClaw Researcher`, `OpenClaw Reporter`, or `OpenClaw Tracker` routes directly to the matching specialized agent through its own Discord account binding.
 - Plain text without an explicit bot mention should stay silent because `requireMention=true` is enabled.
+- A role mention such as `<@&...>` is not a bot-member mention. On 2026-03-11 the text `@OpenClaw Researcher` resolved to Discord role id `1481135755001724991`, not the researcher bot user id `1481133991749750886`.
+- Oracle build config now sets `ignoreOtherMentions=true` so role mentions and unrelated mentions are ignored instead of being treated as a manager wake-up.
 - The earlier `@manager` / `@engineer` alias-based manager prompt still exists in `workspace-research-lead/AGENTS.md`, but manager-only flows now also allow autonomous internal delegation.
 - Operational guidance: mention one teammate bot per message to avoid ambiguous multi-bot wakeups on the shared channel.

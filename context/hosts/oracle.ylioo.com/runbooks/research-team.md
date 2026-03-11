@@ -44,6 +44,7 @@ The live team is configured to respond only to explicit real Discord member ment
 
 Rules:
 - Mention the actual bot member you want in Discord.
+- Do not rely on a same-named Discord role mention. A role mention arrives as `<@&...>` and is not the same as mentioning the bot user.
 - Mentioning `OpenClaw Manager` wakes `research-lead`.
 - Mentioning `OpenClaw Engineer`, `OpenClaw Researcher`, `OpenClaw Reporter`, or `OpenClaw Tracker` wakes that specialist directly.
 - Plain text without an explicit bot mention should not trigger a reply in that guild.
@@ -73,6 +74,12 @@ Rules:
 ## Runtime implementation notes
 - Native OpenClaw multi-account Discord routing is now live through `channels.discord.accounts`, `channels.discord.defaultAccount`, and binding-level `match.accountId`.
 - All 5 Discord accounts are bound to the same guild channel, but each account wakes only on its own explicit bot mention because the guild requires mentions.
+- Oracle build config also sets `ignoreOtherMentions=true` so a Discord role mention or unrelated member mention is dropped instead of falling through to the manager path.
+- All 5 normal team agents now keep the same basic tool baseline:
+  - browser enabled
+  - gateway-host `exec`
+  - filesystem access not limited to the workspace root
+  - no per-agent `exec` deny overrides
 - `research-lead` still has managed alias logic in `~/.openclaw/workspace-research-lead/AGENTS.md`, but that is now a fallback path rather than the primary routing model.
 - `TEAM.md` in workspace snapshots is operator documentation only and is not auto-injected into the runtime bootstrap prompt on this OpenClaw checkout.
 - `openclaw health` reports only the default Discord account; use gateway logs to verify all 5 accounts after restart.
@@ -102,5 +109,6 @@ When changing team behavior:
 
 ## Known limitations
 - Mentioning multiple teammate bots in one message may wake more than one account on the shared channel; prefer one bot mention per message.
+- If Discord autocompletes to a role instead of the bot user, the message will be ignored after the `ignoreOtherMentions=true` hardening. Use the actual bot member mention, not a role mention.
 - The manager compatibility aliases in `workspace-research-lead/AGENTS.md` still exist, so prompt-level behavior and native Discord routing both matter for manager-only flows.
 - This document reflects the Oracle deployment state, not generic upstream OpenClaw behavior.

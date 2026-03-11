@@ -225,11 +225,6 @@
         },
         "sandbox": {
           "mode": "off"
-        },
-        "tools": {
-          "deny": [
-            "exec"
-          ]
         }
       },
       {
@@ -266,11 +261,6 @@
           "mode": "all",
           "workspaceAccess": "rw",
           "scope": "agent"
-        },
-        "tools": {
-          "deny": [
-            "exec"
-          ]
         }
       },
       {
@@ -283,11 +273,6 @@
           "mode": "all",
           "workspaceAccess": "rw",
           "scope": "agent"
-        },
-        "tools": {
-          "deny": [
-            "exec"
-          ]
         }
       }
     ]
@@ -306,7 +291,7 @@
       "enabled": false
     },
     "exec": {
-      "host": "sandbox",
+      "host": "gateway",
       "security": "full",
       "ask": "off"
     },
@@ -403,6 +388,7 @@
       "guilds": {
         "565501940742619145": {
           "requireMention": true,
+          "ignoreOtherMentions": true,
           "users": [
             "476950196589428738"
           ],
