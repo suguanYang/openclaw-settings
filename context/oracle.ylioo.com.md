@@ -83,6 +83,17 @@ Last verified: 2026-03-11 UTC
   - `skills/*/SKILL.md` from `workspace/` and `workspace-*`
 - `scripts/snapshot.sh` prunes stale snapshot files so removed host-side files disappear on the next sync.
 - A temporary local `snapshots/.env` capture was removed on 2026-03-11 and the snapshot was refreshed; current `_meta.json` confirms no `.env` file is tracked.
+- Snapshot redaction now preserves non-secret numeric config fields such as `maxTokens`.
+- `managed/workspace/skills/*` and `managed/workspace-research-lead/{ISSUES,STATUS}.md` now mirror the live Oracle workspace baseline.
+- Declarative rebuild coverage is now complete for the current Oracle deployment; remaining snapshot-only files are runtime/generated state listed in `context/source-of-truth.md`.
+
+## Managed rebuild kit
+- Desired config template: `managed/openclaw.json.template`
+- Oracle non-secret profile: `profiles/oracle.ylioo.com.env`
+- Secrets contract: `managed/secrets.example.env`
+- State-model doc: `context/source-of-truth.md`
+- Render helper: `scripts/render-managed-state.sh`
+- Apply helper: `scripts/apply-managed-host.sh`
 
 ## Preferred commands from this repo
 - Status: `./scripts/oracle-openclaw.sh status`

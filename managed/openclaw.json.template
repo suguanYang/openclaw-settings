@@ -1,0 +1,502 @@
+{
+  "logging": {
+    "level": "trace",
+    "consoleLevel": "debug",
+    "consoleStyle": "pretty"
+  },
+  "browser": {
+    "enabled": true,
+    "executablePath": "__OPENCLAW_BROWSER_EXECUTABLE_PATH__",
+    "headless": true,
+    "noSandbox": true,
+    "defaultProfile": "openclaw"
+  },
+  "acp": {
+    "enabled": true,
+    "backend": "acpx",
+    "defaultAgent": "claude",
+    "allowedAgents": [
+      "claude"
+    ],
+    "maxConcurrentSessions": 4,
+    "runtime": {
+      "ttlMinutes": 180
+    }
+  },
+  "models": {
+    "providers": {
+      "ikuncode-claude": {
+        "baseUrl": "${ANTHROPIC_BASE_URL}",
+        "apiKey": "${ANTHROPIC_API_KEY}",
+        "api": "anthropic-messages",
+        "headers": {
+          "User-Agent": "claude-cli/2.0.76 (external, cli)"
+        },
+        "models": [
+          {
+            "id": "claude-opus-4-5-20251101",
+            "name": "claude-opus-4-5-20251101",
+            "api": "anthropic-messages",
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 32000,
+            "compat": {}
+          },
+          {
+            "id": "claude-sonnet-4-6",
+            "name": "claude-sonnet-4-6",
+            "api": "anthropic-messages",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 32000,
+            "compat": {}
+          },
+          {
+            "id": "claude-opus-4-6",
+            "name": "claude-opus-4-6",
+            "api": "anthropic-messages",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 32000,
+            "compat": {}
+          }
+        ]
+      },
+      "ikuncode-codex": {
+        "baseUrl": "${OPENAI_BASE_URL}",
+        "apiKey": "${OPENAI_API_KEY}",
+        "api": "openai-responses",
+        "headers": {
+          "User-Agent": "Mozilla/5.0"
+        },
+        "models": [
+          {
+            "id": "gpt-5.3-codex",
+            "name": "gpt-5.3-codex",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 400000,
+            "maxTokens": 128000
+          },
+          {
+            "id": "gpt-5.2-codex",
+            "name": "gpt-5.2-codex",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 400000,
+            "maxTokens": 128000
+          },
+          {
+            "id": "gpt-5.2",
+            "name": "gpt-5.2",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 400000,
+            "maxTokens": 128000
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "ikuncode-claude/claude-opus-4-5-20251101"
+      },
+      "models": {
+        "ikuncode-claude/claude-opus-4-5-20251101": {
+          "params": {
+            "maxTokens": 1024
+          },
+          "streaming": false
+        },
+        "ikuncode-codex/gpt-5.3-codex": {},
+        "ikuncode-codex/gpt-5.2-codex": {},
+        "ikuncode-codex/gpt-5.2": {},
+        "ikuncode-claude/claude-sonnet-4-6": {},
+        "ikuncode-claude/claude-opus-4-6": {}
+      },
+      "workspace": "__OPENCLAW_WORKSPACE_ROOT__",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8,
+        "maxSpawnDepth": 2,
+        "maxChildrenPerAgent": 6,
+        "archiveAfterMinutes": 240,
+        "runTimeoutSeconds": 1800
+      },
+      "sandbox": {
+        "mode": "all",
+        "workspaceAccess": "rw",
+        "scope": "agent",
+        "docker": {
+          "image": "openclaw-sandbox:ubuntu-24.04-full",
+          "workdir": "/workspace",
+          "readOnlyRoot": false,
+          "network": "bridge",
+          "user": "0:0",
+          "env": {
+            "GH_CONFIG_DIR": "/root/.config/gh",
+            "npm_config_nodedir": "/usr"
+          },
+          "setupCommand": "(git config --global credential.https://github.com.helper \"!gh auth git-credential\" || true) && (sudo -n true >/dev/null 2>&1 || (printf \"#!/usr/bin/env bash\\nexec \\\"\\$@\\\"\\n\" > /usr/local/bin/sudo && chmod +x /usr/local/bin/sudo))",
+          "binds": [
+            "__OPENCLAW_GH_CONFIG_BIND_ROOT__:/root/.config/gh:rw",
+            "__OPENCLAW_GH_CONFIG_BIND_ROOT__:/home/__OPENCLAW_HOST_USER__/.config/gh:rw",
+            "__OPENCLAW_GH_BIN_HOST_PATH__:/usr/local/bin/gh:ro"
+          ]
+        }
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "default": true,
+        "name": "Main Agent",
+        "workspace": "${OPENCLAW_WORKSPACE_ROOT}",
+        "agentDir": "~/.openclaw/agents/main/agent"
+      },
+      {
+        "id": "research-lead",
+        "name": "Research Lead",
+        "workspace": "~/.openclaw/workspace-research-lead",
+        "agentDir": "~/.openclaw/agents/research-lead/agent",
+        "model": "ikuncode-claude/claude-opus-4-5-20251101",
+        "groupChat": {
+          "mentionPatterns": [
+            "@manager\b",
+            "@lead\b",
+            "@engineer\b",
+            "@researcher\b",
+            "@reporter\b",
+            "@tracker\b"
+          ]
+        },
+        "subagents": {
+          "allowAgents": [
+            "engineer",
+            "reporter",
+            "researcher",
+            "tracker"
+          ]
+        },
+        "sandbox": {
+          "mode": "off"
+        },
+        "tools": {
+          "deny": [
+            "exec"
+          ]
+        }
+      },
+      {
+        "id": "researcher",
+        "name": "Researcher",
+        "workspace": "~/.openclaw/workspace-researcher",
+        "agentDir": "~/.openclaw/agents/researcher/agent",
+        "model": "ikuncode-claude/claude-sonnet-4-6",
+        "sandbox": {
+          "mode": "all",
+          "workspaceAccess": "rw",
+          "scope": "agent"
+        }
+      },
+      {
+        "id": "engineer",
+        "name": "Engineer",
+        "workspace": "~/.openclaw/workspace-engineer",
+        "agentDir": "~/.openclaw/agents/engineer/agent",
+        "model": "ikuncode-claude/claude-sonnet-4-6",
+        "sandbox": {
+          "mode": "all",
+          "workspaceAccess": "rw",
+          "scope": "agent"
+        }
+      },
+      {
+        "id": "reporter",
+        "name": "Reporter",
+        "workspace": "~/.openclaw/workspace-reporter",
+        "agentDir": "~/.openclaw/agents/reporter/agent",
+        "model": "ikuncode-claude/claude-sonnet-4-6",
+        "sandbox": {
+          "mode": "all",
+          "workspaceAccess": "rw",
+          "scope": "agent"
+        },
+        "tools": {
+          "deny": [
+            "exec"
+          ]
+        }
+      },
+      {
+        "id": "tracker",
+        "name": "Tracker",
+        "workspace": "~/.openclaw/workspace-tracker",
+        "agentDir": "~/.openclaw/agents/tracker/agent",
+        "model": "ikuncode-claude/claude-sonnet-4-6",
+        "sandbox": {
+          "mode": "all",
+          "workspaceAccess": "rw",
+          "scope": "agent"
+        },
+        "tools": {
+          "deny": [
+            "exec"
+          ]
+        }
+      }
+    ]
+  },
+  "tools": {
+    "deny": [],
+    "web": {
+      "search": {
+        "enabled": false
+      },
+      "fetch": {
+        "enabled": true
+      }
+    },
+    "elevated": {
+      "enabled": false
+    },
+    "exec": {
+      "host": "sandbox",
+      "security": "full",
+      "ask": "off"
+    },
+    "fs": {
+      "workspaceOnly": false
+    }
+  },
+  "bindings": [
+    {
+      "agentId": "research-lead",
+      "match": {
+        "channel": "discord",
+        "accountId": "manager",
+        "peer": {
+          "kind": "channel",
+          "id": "__OPENCLAW_DISCORD_CHANNEL_ID__"
+        }
+      },
+      "type": "route"
+    },
+    {
+      "agentId": "engineer",
+      "match": {
+        "channel": "discord",
+        "accountId": "engineer",
+        "peer": {
+          "kind": "channel",
+          "id": "__OPENCLAW_DISCORD_CHANNEL_ID__"
+        }
+      },
+      "type": "route"
+    },
+    {
+      "agentId": "researcher",
+      "match": {
+        "channel": "discord",
+        "accountId": "researcher",
+        "peer": {
+          "kind": "channel",
+          "id": "__OPENCLAW_DISCORD_CHANNEL_ID__"
+        }
+      },
+      "type": "route"
+    },
+    {
+      "agentId": "reporter",
+      "match": {
+        "channel": "discord",
+        "accountId": "reporter",
+        "peer": {
+          "kind": "channel",
+          "id": "__OPENCLAW_DISCORD_CHANNEL_ID__"
+        }
+      },
+      "type": "route"
+    },
+    {
+      "agentId": "tracker",
+      "match": {
+        "channel": "discord",
+        "accountId": "tracker",
+        "peer": {
+          "kind": "channel",
+          "id": "__OPENCLAW_DISCORD_CHANNEL_ID__"
+        }
+      },
+      "type": "route"
+    }
+  ],
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true,
+    "ownerDisplay": "raw"
+  },
+  "session": {
+    "threadBindings": {
+      "enabled": true,
+      "idleHours": 72,
+      "maxAgeHours": 0
+    }
+  },
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "commands": {
+        "nativeSkills": true
+      },
+      "groupPolicy": "allowlist",
+      "streaming": "partial",
+      "allowFrom": [
+        "__OPENCLAW_DISCORD_OWNER_USER_ID__"
+      ],
+      "guilds": {
+        "__OPENCLAW_DISCORD_GUILD_ID__": {
+          "requireMention": true,
+          "users": [
+            "__OPENCLAW_DISCORD_OWNER_USER_ID__"
+          ],
+          "channels": {
+            "__OPENCLAW_DISCORD_CHANNEL_NAME__": {
+              "allow": true
+            }
+          }
+        }
+      },
+      "threadBindings": {
+        "enabled": true,
+        "idleHours": 72,
+        "maxAgeHours": 0,
+        "spawnSubagentSessions": true,
+        "spawnAcpSessions": true
+      },
+      "defaultAccount": "manager",
+      "accounts": {
+        "manager": {
+          "name": "OpenClaw Manager",
+          "token": "${DISCORD_MANAGER_TOKEN}"
+        },
+        "engineer": {
+          "name": "OpenClaw Engineer",
+          "token": "${DISCORD_ENGINEER_TOKEN}"
+        },
+        "researcher": {
+          "name": "OpenClaw Researcher",
+          "token": "${DISCORD_RESEARCHER_TOKEN}"
+        },
+        "reporter": {
+          "name": "OpenClaw Reporter",
+          "token": "${DISCORD_REPORTER_TOKEN}"
+        },
+        "tracker": {
+          "name": "OpenClaw Tracker",
+          "token": "${DISCORD_TRACKER_TOKEN}"
+        }
+      }
+    }
+  },
+  "gateway": {
+    "port": __OPENCLAW_GATEWAY_PORT__,
+    "mode": "local",
+    "bind": "loopback",
+    "controlUi": {
+      "enabled": true,
+      "root": "__OPENCLAW_CONTROL_UI_ROOT__",
+      "allowedOrigins": [
+        "__OPENCLAW_CONTROL_UI_ALLOWED_ORIGIN__"
+      ]
+    },
+    "auth": {
+      "mode": "password",
+      "password": "${OPENCLAW_GATEWAY_PASSWORD}"
+    },
+    "trustedProxies": [
+      "127.0.0.1",
+      "::1"
+    ],
+    "tailscale": {
+      "mode": "serve",
+      "resetOnExit": false
+    }
+  },
+  "skills": {
+    "install": {
+      "nodeManager": "pnpm"
+    }
+  },
+  "plugins": {
+    "entries": {
+      "acpx": {
+        "enabled": true,
+        "config": {
+          "cwd": "__OPENCLAW_WORKSPACE_ROOT__",
+          "permissionMode": "approve-all",
+          "nonInteractivePermissions": "fail"
+        }
+      },
+      "open-prose": {
+        "enabled": true
+      }
+    }
+  }
+}

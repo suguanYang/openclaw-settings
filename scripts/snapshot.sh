@@ -32,6 +32,7 @@ collect_local() {
   copy_if_exists "cron/jobs.json.bak"
   copy_if_exists "acp-harness.env"
   copy_if_exists "discord/model-picker-preferences.json"
+  copy_if_exists "discord/thread-bindings.json"
   copy_if_exists "devices/paired.json"
   copy_if_exists "devices/pending.json"
 
@@ -81,6 +82,11 @@ collect_local() {
     cp "$HOME/.claude/settings.json" "$SRC_STAGE/claude/settings.json"
   fi
 
+  if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service" ]; then
+    mkdir -p "$SRC_STAGE/systemd"
+    cp "$HOME/.config/systemd/user/openclaw-gateway.service" "$SRC_STAGE/systemd/openclaw-gateway.service"
+  fi
+
   if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf" ]; then
     mkdir -p "$SRC_STAGE/systemd/openclaw-gateway.service.d"
     cp \
@@ -110,6 +116,7 @@ add_file "cron/jobs.json"
 add_file "cron/jobs.json.bak"
 add_file "acp-harness.env"
 add_file "discord/model-picker-preferences.json"
+add_file "discord/thread-bindings.json"
 add_file "devices/paired.json"
 add_file "devices/pending.json"
 
@@ -143,6 +150,10 @@ if [ -f "$HOME/.claude/settings.json" ]; then
   paths+=("$HOME/.claude/settings.json")
 fi
 
+if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service" ]; then
+  paths+=("$HOME/.config/systemd/user/openclaw-gateway.service")
+fi
+
 if [ -f "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf" ]; then
   paths+=("$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf")
 fi
@@ -174,9 +185,14 @@ src_root = Path(sys.argv[1])
 out_root = Path(sys.argv[2])
 source_id = sys.argv[3]
 
-SENSITIVE_KEY_PARTS = (
+SENSITIVE_KEY_NAMES = (
     "api_key",
     "apikey",
+    "client_secret",
+    "clientsecret",
+)
+
+SENSITIVE_KEY_PARTS = (
     "token",
     "secret",
     "password",
@@ -184,10 +200,12 @@ SENSITIVE_KEY_PARTS = (
     "cookie",
     "bearer",
     "private",
-    "client_secret",
-    "clientsecret",
     "refresh",
 )
+
+NON_SENSITIVE_KEY_NAMES = {
+    "max_tokens",
+}
 
 STRING_PATTERNS = [
     re.compile(r"\bsk-[A-Za-z0-9_-]{16,}\b"),
@@ -208,9 +226,17 @@ def redact_string(value: str) -> str:
     redacted = LINE_SECRET_PATTERN.sub(lambda m: f"{m.group(1)}=<redacted>", redacted)
     return redacted
 
+def normalize_key(key: str) -> str:
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower().replace("-", "_")
+
+
 def is_sensitive_key(key: str) -> bool:
-    normalized = key.lower().replace("-", "_")
-    return any(part in normalized for part in SENSITIVE_KEY_PARTS)
+    normalized = normalize_key(key)
+    if normalized in NON_SENSITIVE_KEY_NAMES:
+        return False
+    if normalized in SENSITIVE_KEY_NAMES:
+        return True
+    return any(part in SENSITIVE_KEY_PARTS for part in normalized.split("_") if part)
 
 def redact_json(value):
     if isinstance(value, dict):
@@ -245,6 +271,14 @@ for src_file in sorted(src_root.rglob("*")):
             rel = Path("codex/config.toml")
         elif len(parts) >= 4 and parts[2] == ".claude" and parts[3] == "settings.json":
             rel = Path("claude/settings.json")
+        elif (
+            len(parts) >= 6
+            and parts[2] == ".config"
+            and parts[3] == "systemd"
+            and parts[4] == "user"
+            and parts[5] == "openclaw-gateway.service"
+        ):
+            rel = Path("systemd/openclaw-gateway.service")
         elif (
             len(parts) >= 7
             and parts[2] == ".config"
