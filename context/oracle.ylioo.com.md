@@ -35,6 +35,7 @@ Last verified: 2026-03-11 UTC
   - `OpenClaw Researcher`
   - `OpenClaw Reporter`
   - `OpenClaw Tracker`
+- The legacy placeholder Discord member `bot1469239070508191847` was removed from `sstar` after the real manager cutover was verified.
 
 ## ACP and plugin state
 - `acp.enabled=true` with backend `acpx`.
