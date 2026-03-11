@@ -53,7 +53,9 @@ Last verified: 2026-03-11 UTC
 - `~/.codex/config.toml` was removed from the host on 2026-03-09 when Codex ACP was disabled.
 - `~/.claude/settings.json` is present and currently pins `claude-sonnet-4-5-20250929`.
 - `scripts/oracle-openclaw.sh runtime-exec` now sources `~/.openclaw/acp-harness.env` so local smoke checks use the same extra env as the real gateway process.
-- Engineer-only GitHub CLI sandbox binds now live under `~/.openclaw/workspace-engineer/.openclaw/{gh,bin/gh}`; the global sandbox defaults keep `docker.binds=[]`.
+- Global sandbox defaults keep `docker.binds=[]`.
+- The earlier engineer-only GitHub CLI bind-mount workaround was removed from the normal engineer agent path on 2026-03-11 because it blocked manager-spawned engineer subagents.
+- For heavier repo or GitHub-auth work, prefer Claude ACP threads instead of relying on GitHub CLI inside the normal engineer sandbox.
 - Preferred engineer smoke test:
   - `./scripts/oracle-openclaw.sh runtime-exec 'run_openclaw agent --agent engineer --message "Reply with exactly: engineer ok" --json'`
 - 2026-03-11 engineer re-test result:
@@ -96,7 +98,8 @@ Last verified: 2026-03-11 UTC
 - `scripts/snapshot.sh` prunes stale snapshot files so removed host-side files disappear on the next sync.
 - A temporary local `snapshots/.env` capture was removed on 2026-03-11 and the snapshot was refreshed; current `_meta.json` confirms no `.env` file is tracked.
 - Snapshot redaction now preserves non-secret numeric config fields such as `maxTokens`.
-- `managed/workspace/skills/*` and `managed/workspace-research-lead/{ISSUES,STATUS}.md` now mirror the live Oracle workspace baseline.
+- `managed/workspace/skills/*` and the managed workspace prompt files define the rebuild baseline.
+- Live manager task state such as `snapshots/workspace-research-lead/{ISSUES,STATUS}.md` is expected to drift as the team works.
 - Declarative rebuild coverage is now complete for the current Oracle deployment; remaining snapshot-only files are runtime/generated state listed in `context/source-of-truth.md`.
 
 ## Managed rebuild kit
@@ -159,9 +162,10 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 ## Direct member mention workflow
 - Real Discord member mentions are now the primary dispatch path on Oracle.
 - Mentioning `OpenClaw Manager` in `#general` routes the message to `research-lead` through Discord account `manager`.
+- `research-lead` is now configured to auto-delegate substantial tasks to `researcher`, `engineer`, `reporter`, and `tracker` instead of waiting for explicit teammate mentions.
 - Mentioning `OpenClaw Engineer`, `OpenClaw Researcher`, `OpenClaw Reporter`, or `OpenClaw Tracker` routes directly to the matching specialized agent through its own Discord account binding.
 - Plain text without an explicit bot mention should stay silent because `requireMention=true` is enabled.
-- The earlier `@manager` / `@engineer` alias-based manager prompt still exists in `workspace-research-lead/AGENTS.md`, but it is now a fallback compatibility layer rather than the primary user UX.
+- The earlier `@manager` / `@engineer` alias-based manager prompt still exists in `workspace-research-lead/AGENTS.md`, but manager-only flows now also allow autonomous internal delegation.
 - Operational guidance: mention one teammate bot per message to avoid ambiguous multi-bot wakeups on the shared channel.
 
 ## Discord real-bot portal status from 2026-03-11

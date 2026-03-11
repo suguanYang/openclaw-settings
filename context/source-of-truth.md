@@ -8,7 +8,7 @@ Make this repo sufficient to rebuild the managed OpenClaw deployment on a fresh 
 - `managed/acp-harness.env.template`: desired ACP bridge env file rendered locally before upload.
 - `managed/systemd/openclaw-gateway.service.d/acp-harness.conf`: required drop-in that injects the ACP harness env file into the service.
 - `managed/claude/settings.json`: host-local Claude CLI settings needed by the current Oracle setup.
-- `managed/workspace*` and `managed/skills/*`: the managed prompts, memory baselines, and custom skills that define team behavior.
+- `managed/workspace*` and `managed/skills/*`: the managed prompts, neutral workspace baselines, and custom skills that define team behavior.
 - `profiles/*.env`: tracked non-secret host-specific values such as paths, IDs, ports, and origins.
 - `managed/secrets.example.env`: contract for the untracked secret env file.
 - `scripts/render-managed-state.sh` and `scripts/apply-managed-host.sh`: deterministic render/apply flow for fresh-host rebuilds.
@@ -44,6 +44,7 @@ These files may exist on the host and are useful for audits/snapshots, but they 
 
 ## Coverage status
 - As of 2026-03-11 UTC, the Oracle deployment's declarative settings are captured in `managed/`, `profiles/oracle.ylioo.com.env`, and the local-only `.secrets/oracle.ylioo.com.env`.
+- Live task boards such as `snapshots/workspace-research-lead/{STATUS,ISSUES}.md` may intentionally drift from the neutral `managed/` baselines after the team starts working.
 - Remaining snapshot-only files are runtime or generated state and are intentionally excluded from fresh-host rebuild inputs.
 
 ## Audit policy

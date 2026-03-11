@@ -4,7 +4,7 @@ Use ACP thread sessions for module-specific coding work.
 
 Default mapping:
 - Claude: implementation, debugging, architecture review, and long-context repo work on Oracle.
-- Codex: disabled on `oracle.ylioo.com` for now. Do not plan or promise Codex ACP sessions until host support is repaired.
+- Normal team turns already use Codex-first models, so reserve ACP for heavier coding-harness cases rather than ordinary chat turns.
 
 Rules:
 - Set an explicit `cwd` before repo work.

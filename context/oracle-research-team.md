@@ -53,14 +53,16 @@ Rules:
 `research-lead` is still the manager, but it is no longer the only Discord-facing entrypoint.
 
 Rules:
-- If the message mentions `OpenClaw Manager`, the manager answers directly.
+- If the message mentions `OpenClaw Manager`, the manager is the entrypoint and may delegate internally as needed.
 - If the message mentions a specialist bot, that specialist receives the task through its own bound Discord account.
-- The manager prompt still contains compatibility aliases such as `@manager` and `@engineer`, but the intended user-facing workflow is real Discord bot mentions.
+- The manager now treats substantial tasks as orchestration work by default rather than waiting for explicit teammate mentions.
 - Specialist work should stay in dedicated bound subagent sessions or threads when possible.
 
 ## Examples
 - `@OpenClaw Manager give me a short status of the current work`
-  - Expected behavior: `research-lead` replies directly.
+  - Expected behavior: `research-lead` replies directly, optionally using reporter or tracker state.
+- `@OpenClaw Manager research this topic, validate the risky parts, and keep me posted`
+  - Expected behavior: `research-lead` opens a managed workflow, delegates internally, and returns progress updates plus a synthesized answer.
 - `@OpenClaw Engineer validate this claim with code and give me the result`
   - Expected behavior: `engineer` responds through the engineer bot account.
 - `@OpenClaw Researcher collect the latest public context on this topic`

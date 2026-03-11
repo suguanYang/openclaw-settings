@@ -253,14 +253,7 @@
         "sandbox": {
           "mode": "all",
           "workspaceAccess": "rw",
-          "scope": "agent",
-          "docker": {
-            "binds": [
-              "__OPENCLAW_GH_CONFIG_BIND_ROOT__:/root/.config/gh:rw",
-              "__OPENCLAW_GH_CONFIG_BIND_ROOT__:/home/__OPENCLAW_HOST_USER__/.config/gh:rw",
-              "__OPENCLAW_GH_BIN_HOST_PATH__:/usr/local/bin/gh:ro"
-            ]
-          }
+          "scope": "agent"
         }
       },
       {

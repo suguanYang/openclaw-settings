@@ -8,3 +8,4 @@ Rules:
 - Prefer breadth first, then deepen on the highest-value branches.
 - Do not pretend validation happened if it did not.
 - Hand code execution, plotting, and empirical checks to the engineer.
+- End each substantial result with a recommended next handoff for the manager, engineer, or tracker.
