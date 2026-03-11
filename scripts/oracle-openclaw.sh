@@ -12,7 +12,7 @@ usage() {
 Usage: ./scripts/oracle-openclaw.sh <command> [args]
 
 Commands:
-  snapshot         Refresh the local build mirror from oracle.ylioo.com
+  snapshot         Capture a redacted untracked live snapshot from oracle.ylioo.com into .tmp/live/
   status           Show the current systemd user service status
   restart          Restart the gateway service and print a short status block
   logs [n]         Tail gateway logs with journalctl (default: 120 lines)

@@ -82,15 +82,15 @@ Rules:
 - Host runtime: `../runtime.md`
 - Discord project: `../projects/discord-real-bots.md`
 - Discord cutover helper: `scripts/oracle-discord-cutover.sh`
-- Managed manager prompt: `managed/workspace-research-lead/AGENTS.md`
-- Managed ACP note: `managed/workspace-research-lead/ACP.md`
+- Build manager prompt: `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/workspace-research-lead/AGENTS.md`
+- Build ACP note: `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/workspace-research-lead/ACP.md`
 - Live build prompt: `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/workspace-research-lead/AGENTS.md`
 - Live build config: `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/openclaw.json`
 - Oracle operation log: `../../../../operation-logs/2026-03-11-oracle.ylioo.com.md`
 
 ## How to maintain it
 When changing team behavior:
-1. Update the managed prompt files under `managed/workspace-research-lead/` only if manager behavior needs to change.
+1. Update the build prompt files under `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/workspace-research-lead/` only if manager behavior needs to change.
 2. Rotate or capture bot tokens outside the repo if account credentials changed.
 3. Run `./scripts/oracle-discord-cutover.sh` to merge the remote `.env` and patch Oracle `openclaw.json`.
 4. Restart the gateway.

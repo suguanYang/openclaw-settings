@@ -2,8 +2,8 @@
 
 Last verified: 2026-03-11 UTC
 
-## Current build mirror
-- The redacted build mirror is synced as of 2026-03-11 UTC.
+## Current build tree
+- The tracked build tree is the intended Oracle deploy source.
 - Build files do not include Oracle plaintext secret values.
 - Build coverage includes:
   - `acp-harness.env`
@@ -11,22 +11,18 @@ Last verified: 2026-03-11 UTC
   - `systemd/openclaw-gateway.service.d/acp-harness.conf`
   - top-level Markdown files from `workspace/` and `workspace-*`
   - `skills/*/SKILL.md` from `workspace/` and `workspace-*`
-- `scripts/snapshot.sh` prunes stale mirrored files so removed host-side files disappear on the next sync.
-- The tracked build `.env` is regenerated from `profiles/oracle.ylioo.com.env` plus `managed/secrets.example.env`, so the file path exists but secret values stay blank in git.
-- Redaction preserves non-secret numeric config fields such as `maxTokens`.
-- `managed/workspace/skills/*` and the managed workspace prompt files define the rebuild baseline.
-- Live manager task state such as `../../../build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/workspace-research-lead/{ISSUES,STATUS}.md` is expected to drift as the team works.
-- Declarative rebuild coverage is complete for the current Oracle deployment; remaining build-mirror-only files are runtime/generated state listed in `../../architecture/source-of-truth.md`.
+- `build/oracle.ylioo.com/rootfs/home/suguan/.openclaw/.env` contains only non-secret tracked values.
+- Local secret values come from `.secrets/oracle.ylioo.com.env` and are merged during render/apply.
+- Runtime-only files such as thread bindings, device state, backups, exec approvals, and the generated service file are intentionally excluded from the tracked deploy tree.
 
 ## Managed rebuild kit
-- Desired config template: `managed/openclaw.json.template`
-- Oracle non-secret profile: `profiles/oracle.ylioo.com.env`
-- Secrets contract: `managed/secrets.example.env`
+- Desired rootfs: `../../../build/oracle.ylioo.com/rootfs/`
+- Secrets contract: `../../../build/oracle.ylioo.com/secrets.example.env`
 - State-model doc: `../../architecture/source-of-truth.md`
-- Build mirror: `../../../build/oracle.ylioo.com/`
-- Render helper: `scripts/render-managed-state.sh`
-- Apply helper: `scripts/apply-managed-host.sh`
-- Build mirror helper: `scripts/snapshot.sh`
+- Build tree: `../../../build/oracle.ylioo.com/`
+- Render helper: `scripts/render-build-state.sh`
+- Apply helper: `scripts/apply-build-host.sh`
+- Live capture helper: `scripts/snapshot.sh`
 
 ## Preferred commands from this repo
 - Status: `./scripts/oracle-openclaw.sh status`
@@ -62,4 +58,4 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 - Multi-Agent Routing: `https://docs.openclaw.ai/concepts/multi-agent`
 - Upstream source: `https://github.com/openclaw/openclaw`
 
-OpenClaw is upstream open source and moves quickly. Re-check the relevant official docs and upstream source before changing Oracle-managed behavior based on older local notes.
+OpenClaw is upstream open source and moves quickly. Re-check the relevant official docs and upstream source before changing Oracle deployment behavior based on older local notes.

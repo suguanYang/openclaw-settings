@@ -1,72 +1,210 @@
 {
+  "logging": {
+    "level": "trace",
+    "consoleLevel": "debug",
+    "consoleStyle": "pretty"
+  },
+  "browser": {
+    "enabled": true,
+    "executablePath": "/home/suguan/.openclaw/tools/playwright-browsers/chromium-1208/chrome-linux/chrome",
+    "headless": true,
+    "noSandbox": true,
+    "defaultProfile": "openclaw"
+  },
   "acp": {
+    "enabled": true,
+    "backend": "acpx",
+    "defaultAgent": "claude",
     "allowedAgents": [
       "claude"
     ],
-    "backend": "acpx",
-    "defaultAgent": "claude",
-    "enabled": true,
     "maxConcurrentSessions": 4,
     "runtime": {
       "ttlMinutes": 180
     }
   },
+  "models": {
+    "providers": {
+      "ikuncode-claude": {
+        "baseUrl": "${ANTHROPIC_BASE_URL}",
+        "apiKey": "${ANTHROPIC_API_KEY}",
+        "api": "anthropic-messages",
+        "headers": {
+          "User-Agent": "claude-cli/2.0.76 (external, cli)"
+        },
+        "models": [
+          {
+            "id": "claude-opus-4-5-20251101",
+            "name": "claude-opus-4-5-20251101",
+            "api": "anthropic-messages",
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 32000,
+            "compat": {}
+          },
+          {
+            "id": "claude-sonnet-4-6",
+            "name": "claude-sonnet-4-6",
+            "api": "anthropic-messages",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 32000,
+            "compat": {}
+          },
+          {
+            "id": "claude-opus-4-6",
+            "name": "claude-opus-4-6",
+            "api": "anthropic-messages",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 200000,
+            "maxTokens": 32000,
+            "compat": {}
+          }
+        ]
+      },
+      "ikuncode-codex": {
+        "baseUrl": "${OPENAI_BASE_URL}",
+        "apiKey": "${OPENAI_API_KEY}",
+        "api": "openai-responses",
+        "headers": {
+          "User-Agent": "Mozilla/5.0"
+        },
+        "models": [
+          {
+            "id": "gpt-5.3-codex",
+            "name": "gpt-5.3-codex",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 400000,
+            "maxTokens": 128000
+          },
+          {
+            "id": "gpt-5.2-codex",
+            "name": "gpt-5.2-codex",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 400000,
+            "maxTokens": 128000
+          },
+          {
+            "id": "gpt-5.2",
+            "name": "gpt-5.2",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 400000,
+            "maxTokens": 128000
+          }
+        ]
+      }
+    }
+  },
   "agents": {
     "defaults": {
-      "compaction": {
-        "mode": "safeguard"
-      },
-      "maxConcurrent": 4,
       "model": {
         "primary": "ikuncode-codex/gpt-5.3-codex"
       },
       "models": {
-        "ikuncode-codex/gpt-5.2": {},
-        "ikuncode-codex/gpt-5.2-codex": {},
         "ikuncode-codex/gpt-5.3-codex": {
           "params": {
             "maxTokens": 1024
           },
           "streaming": false
-        }
+        },
+        "ikuncode-codex/gpt-5.2-codex": {},
+        "ikuncode-codex/gpt-5.2": {}
+      },
+      "workspace": "/home/suguan/openclaw-workspace",
+      "compaction": {
+        "mode": "safeguard"
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8,
+        "maxSpawnDepth": 2,
+        "maxChildrenPerAgent": 6,
+        "archiveAfterMinutes": 240,
+        "runTimeoutSeconds": 1800
       },
       "sandbox": {
+        "mode": "all",
+        "workspaceAccess": "rw",
+        "scope": "agent",
         "docker": {
-          "binds": [],
+          "image": "openclaw-sandbox:ubuntu-24.04-full",
+          "workdir": "/workspace",
+          "readOnlyRoot": false,
+          "network": "bridge",
+          "user": "0:0",
           "env": {
             "GH_CONFIG_DIR": "/root/.config/gh",
             "npm_config_nodedir": "/usr"
           },
-          "image": "openclaw-sandbox:ubuntu-24.04-full",
-          "network": "bridge",
-          "readOnlyRoot": false,
           "setupCommand": "(git config --global credential.https://github.com.helper \"!gh auth git-credential\" || true) && (sudo -n true >/dev/null 2>&1 || (printf \"#!/usr/bin/env bash\\nexec \\\"\\$@\\\"\\n\" > /usr/local/bin/sudo && chmod +x /usr/local/bin/sudo))",
-          "user": "0:0",
-          "workdir": "/workspace"
-        },
-        "mode": "all",
-        "scope": "agent",
-        "workspaceAccess": "rw"
-      },
-      "subagents": {
-        "archiveAfterMinutes": 240,
-        "maxChildrenPerAgent": 6,
-        "maxConcurrent": 8,
-        "maxSpawnDepth": 2,
-        "runTimeoutSeconds": 1800
-      },
-      "workspace": "/home/suguan/openclaw-workspace"
+          "binds": []
+        }
+      }
     },
     "list": [
       {
-        "agentDir": "~/.openclaw/agents/main/agent",
-        "default": true,
         "id": "main",
+        "default": true,
         "name": "Main Agent",
-        "workspace": "${OPENCLAW_WORKSPACE_ROOT}"
+        "workspace": "${OPENCLAW_WORKSPACE_ROOT}",
+        "agentDir": "~/.openclaw/agents/main/agent"
       },
       {
+        "id": "research-lead",
+        "name": "Research Lead",
+        "workspace": "~/.openclaw/workspace-research-lead",
         "agentDir": "~/.openclaw/agents/research-lead/agent",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "groupChat": {
           "mentionPatterns": [
             "@manager\b",
@@ -77,12 +215,6 @@
             "@tracker\b"
           ]
         },
-        "id": "research-lead",
-        "model": "ikuncode-codex/gpt-5.3-codex",
-        "name": "Research Lead",
-        "sandbox": {
-          "mode": "off"
-        },
         "subagents": {
           "allowAgents": [
             "engineer",
@@ -91,82 +223,106 @@
             "tracker"
           ]
         },
+        "sandbox": {
+          "mode": "off"
+        },
         "tools": {
           "deny": [
             "exec"
           ]
-        },
-        "workspace": "~/.openclaw/workspace-research-lead"
+        }
       },
       {
-        "agentDir": "~/.openclaw/agents/researcher/agent",
         "id": "researcher",
-        "model": "ikuncode-codex/gpt-5.3-codex",
         "name": "Researcher",
+        "workspace": "~/.openclaw/workspace-researcher",
+        "agentDir": "~/.openclaw/agents/researcher/agent",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
-          "scope": "agent",
-          "workspaceAccess": "rw"
-        },
-        "workspace": "~/.openclaw/workspace-researcher"
+          "workspaceAccess": "rw",
+          "scope": "agent"
+        }
       },
       {
-        "agentDir": "~/.openclaw/agents/engineer/agent",
         "id": "engineer",
-        "model": "ikuncode-codex/gpt-5.3-codex",
         "name": "Engineer",
+        "workspace": "~/.openclaw/workspace-engineer",
+        "agentDir": "~/.openclaw/agents/engineer/agent",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
-          "scope": "agent",
-          "workspaceAccess": "rw"
-        },
-        "workspace": "~/.openclaw/workspace-engineer"
+          "workspaceAccess": "rw",
+          "scope": "agent"
+        }
       },
       {
-        "agentDir": "~/.openclaw/agents/reporter/agent",
         "id": "reporter",
-        "model": "ikuncode-codex/gpt-5.3-codex",
         "name": "Reporter",
+        "workspace": "~/.openclaw/workspace-reporter",
+        "agentDir": "~/.openclaw/agents/reporter/agent",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
-          "scope": "agent",
-          "workspaceAccess": "rw"
+          "workspaceAccess": "rw",
+          "scope": "agent"
         },
         "tools": {
           "deny": [
             "exec"
           ]
-        },
-        "workspace": "~/.openclaw/workspace-reporter"
+        }
       },
       {
-        "agentDir": "~/.openclaw/agents/tracker/agent",
         "id": "tracker",
-        "model": "ikuncode-codex/gpt-5.3-codex",
         "name": "Tracker",
+        "workspace": "~/.openclaw/workspace-tracker",
+        "agentDir": "~/.openclaw/agents/tracker/agent",
+        "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
-          "scope": "agent",
-          "workspaceAccess": "rw"
+          "workspaceAccess": "rw",
+          "scope": "agent"
         },
         "tools": {
           "deny": [
             "exec"
           ]
-        },
-        "workspace": "~/.openclaw/workspace-tracker"
+        }
       }
     ]
+  },
+  "tools": {
+    "deny": [],
+    "web": {
+      "search": {
+        "enabled": false
+      },
+      "fetch": {
+        "enabled": true
+      }
+    },
+    "elevated": {
+      "enabled": false
+    },
+    "exec": {
+      "host": "sandbox",
+      "security": "full",
+      "ask": "off"
+    },
+    "fs": {
+      "workspaceOnly": false
+    }
   },
   "bindings": [
     {
       "agentId": "research-lead",
       "match": {
-        "accountId": "manager",
         "channel": "discord",
+        "accountId": "manager",
         "peer": {
-          "id": "565501941510045707",
-          "kind": "channel"
+          "kind": "channel",
+          "id": "565501941510045707"
         }
       },
       "type": "route"
@@ -174,11 +330,11 @@
     {
       "agentId": "engineer",
       "match": {
-        "accountId": "engineer",
         "channel": "discord",
+        "accountId": "engineer",
         "peer": {
-          "id": "565501941510045707",
-          "kind": "channel"
+          "kind": "channel",
+          "id": "565501941510045707"
         }
       },
       "type": "route"
@@ -186,11 +342,11 @@
     {
       "agentId": "researcher",
       "match": {
-        "accountId": "researcher",
         "channel": "discord",
+        "accountId": "researcher",
         "peer": {
-          "id": "565501941510045707",
-          "kind": "channel"
+          "kind": "channel",
+          "id": "565501941510045707"
         }
       },
       "type": "route"
@@ -198,11 +354,11 @@
     {
       "agentId": "reporter",
       "match": {
-        "accountId": "reporter",
         "channel": "discord",
+        "accountId": "reporter",
         "peer": {
-          "id": "565501941510045707",
-          "kind": "channel"
+          "kind": "channel",
+          "id": "565501941510045707"
         }
       },
       "type": "route"
@@ -210,267 +366,24 @@
     {
       "agentId": "tracker",
       "match": {
-        "accountId": "tracker",
         "channel": "discord",
+        "accountId": "tracker",
         "peer": {
-          "id": "565501941510045707",
-          "kind": "channel"
+          "kind": "channel",
+          "id": "565501941510045707"
         }
       },
       "type": "route"
     }
   ],
-  "browser": {
-    "defaultProfile": "openclaw",
-    "enabled": true,
-    "executablePath": "/home/suguan/.openclaw/tools/playwright-browsers/chromium-1208/chrome-linux/chrome",
-    "headless": true,
-    "noSandbox": true
-  },
-  "channels": {
-    "discord": {
-      "accounts": {
-        "default": {
-          "allowFrom": [
-            "476950196589428738"
-          ],
-          "groupPolicy": "allowlist",
-          "streaming": "off"
-        },
-        "engineer": {
-          "groupPolicy": "allowlist",
-          "name": "OpenClaw Engineer",
-          "streaming": "off",
-          "token": "<redacted>"
-        },
-        "manager": {
-          "groupPolicy": "allowlist",
-          "name": "OpenClaw Manager",
-          "streaming": "off",
-          "token": "<redacted>"
-        },
-        "reporter": {
-          "groupPolicy": "allowlist",
-          "name": "OpenClaw Reporter",
-          "streaming": "off",
-          "token": "<redacted>"
-        },
-        "researcher": {
-          "groupPolicy": "allowlist",
-          "name": "OpenClaw Researcher",
-          "streaming": "off",
-          "token": "<redacted>"
-        },
-        "tracker": {
-          "groupPolicy": "allowlist",
-          "name": "OpenClaw Tracker",
-          "streaming": "off",
-          "token": "<redacted>"
-        }
-      },
-      "commands": {
-        "nativeSkills": true
-      },
-      "defaultAccount": "manager",
-      "enabled": true,
-      "groupPolicy": "allowlist",
-      "guilds": {
-        "565501940742619145": {
-          "channels": {
-            "general": {
-              "allow": true
-            }
-          },
-          "requireMention": true,
-          "users": [
-            "476950196589428738"
-          ]
-        }
-      },
-      "streaming": "partial",
-      "threadBindings": {
-        "enabled": true,
-        "idleHours": 72,
-        "maxAgeHours": 0,
-        "spawnAcpSessions": true,
-        "spawnSubagentSessions": true
-      }
-    }
+  "messages": {
+    "ackReactionScope": "group-mentions"
   },
   "commands": {
     "native": "auto",
     "nativeSkills": "auto",
-    "ownerDisplay": "raw",
-    "restart": true
-  },
-  "gateway": {
-    "auth": {
-      "mode": "password",
-      "password": "<redacted>"
-    },
-    "bind": "loopback",
-    "controlUi": {
-      "allowedOrigins": [
-        "https://oracle-phoneix.tail54f62.ts.net"
-      ],
-      "enabled": true,
-      "root": "/home/suguan/.openclaw/control-ui"
-    },
-    "mode": "local",
-    "port": 18789,
-    "tailscale": {
-      "mode": "serve",
-      "resetOnExit": false
-    },
-    "trustedProxies": [
-      "127.0.0.1",
-      "::1"
-    ]
-  },
-  "logging": {
-    "consoleLevel": "debug",
-    "consoleStyle": "pretty",
-    "level": "trace"
-  },
-  "messages": {
-    "ackReactionScope": "group-mentions"
-  },
-  "models": {
-    "providers": {
-      "ikuncode-claude": {
-        "api": "anthropic-messages",
-        "apiKey": "<redacted>",
-        "baseUrl": "${ANTHROPIC_BASE_URL}",
-        "headers": {
-          "User-Agent": "claude-cli/2.0.76 (external, cli)"
-        },
-        "models": [
-          {
-            "api": "anthropic-messages",
-            "compat": {},
-            "contextWindow": 200000,
-            "cost": {
-              "cacheRead": 0,
-              "cacheWrite": 0,
-              "input": 0,
-              "output": 0
-            },
-            "id": "claude-opus-4-5-20251101",
-            "maxTokens": 32000,
-            "name": "claude-opus-4-5-20251101"
-          },
-          {
-            "api": "anthropic-messages",
-            "compat": {},
-            "contextWindow": 200000,
-            "cost": {
-              "cacheRead": 0,
-              "cacheWrite": 0,
-              "input": 0,
-              "output": 0
-            },
-            "id": "claude-sonnet-4-6",
-            "input": [
-              "text"
-            ],
-            "maxTokens": 32000,
-            "name": "claude-sonnet-4-6",
-            "reasoning": false
-          },
-          {
-            "api": "anthropic-messages",
-            "compat": {},
-            "contextWindow": 200000,
-            "cost": {
-              "cacheRead": 0,
-              "cacheWrite": 0,
-              "input": 0,
-              "output": 0
-            },
-            "id": "claude-opus-4-6",
-            "input": [
-              "text"
-            ],
-            "maxTokens": 32000,
-            "name": "claude-opus-4-6",
-            "reasoning": false
-          }
-        ]
-      },
-      "ikuncode-codex": {
-        "api": "openai-responses",
-        "apiKey": "<redacted>",
-        "baseUrl": "${OPENAI_BASE_URL}",
-        "headers": {
-          "User-Agent": "Mozilla/5.0"
-        },
-        "models": [
-          {
-            "contextWindow": 400000,
-            "cost": {
-              "cacheRead": 0,
-              "cacheWrite": 0,
-              "input": 0,
-              "output": 0
-            },
-            "id": "gpt-5.3-codex",
-            "input": [
-              "text"
-            ],
-            "maxTokens": 128000,
-            "name": "gpt-5.3-codex",
-            "reasoning": true
-          },
-          {
-            "contextWindow": 400000,
-            "cost": {
-              "cacheRead": 0,
-              "cacheWrite": 0,
-              "input": 0,
-              "output": 0
-            },
-            "id": "gpt-5.2-codex",
-            "input": [
-              "text"
-            ],
-            "maxTokens": 128000,
-            "name": "gpt-5.2-codex",
-            "reasoning": true
-          },
-          {
-            "contextWindow": 400000,
-            "cost": {
-              "cacheRead": 0,
-              "cacheWrite": 0,
-              "input": 0,
-              "output": 0
-            },
-            "id": "gpt-5.2",
-            "input": [
-              "text"
-            ],
-            "maxTokens": 128000,
-            "name": "gpt-5.2",
-            "reasoning": true
-          }
-        ]
-      }
-    }
-  },
-  "plugins": {
-    "entries": {
-      "acpx": {
-        "config": {
-          "cwd": "/home/suguan/openclaw-workspace",
-          "nonInteractivePermissions": "fail",
-          "permissionMode": "approve-all"
-        },
-        "enabled": true
-      },
-      "open-prose": {
-        "enabled": true
-      }
-    }
+    "restart": true,
+    "ownerDisplay": "raw"
   },
   "session": {
     "threadBindings": {
@@ -479,30 +392,117 @@
       "maxAgeHours": 0
     }
   },
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "commands": {
+        "nativeSkills": true
+      },
+      "groupPolicy": "allowlist",
+      "streaming": "partial",
+      "guilds": {
+        "565501940742619145": {
+          "requireMention": true,
+          "users": [
+            "476950196589428738"
+          ],
+          "channels": {
+            "general": {
+              "allow": true
+            }
+          }
+        }
+      },
+      "threadBindings": {
+        "enabled": true,
+        "idleHours": 72,
+        "maxAgeHours": 0,
+        "spawnSubagentSessions": true,
+        "spawnAcpSessions": true
+      },
+      "defaultAccount": "manager",
+      "accounts": {
+        "default": {
+          "allowFrom": [
+            "476950196589428738"
+          ],
+          "groupPolicy": "allowlist",
+          "streaming": "off"
+        },
+        "manager": {
+          "name": "OpenClaw Manager",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
+          "token": "${DISCORD_MANAGER_TOKEN}"
+        },
+        "engineer": {
+          "name": "OpenClaw Engineer",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
+          "token": "${DISCORD_ENGINEER_TOKEN}"
+        },
+        "researcher": {
+          "name": "OpenClaw Researcher",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
+          "token": "${DISCORD_RESEARCHER_TOKEN}"
+        },
+        "reporter": {
+          "name": "OpenClaw Reporter",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
+          "token": "${DISCORD_REPORTER_TOKEN}"
+        },
+        "tracker": {
+          "name": "OpenClaw Tracker",
+          "groupPolicy": "allowlist",
+          "streaming": "off",
+          "token": "${DISCORD_TRACKER_TOKEN}"
+        }
+      }
+    }
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "controlUi": {
+      "enabled": true,
+      "root": "/home/suguan/.openclaw/control-ui",
+      "allowedOrigins": [
+        "https://oracle-phoneix.tail54f62.ts.net"
+      ]
+    },
+    "auth": {
+      "mode": "password",
+      "password": "${OPENCLAW_GATEWAY_PASSWORD}"
+    },
+    "trustedProxies": [
+      "127.0.0.1",
+      "::1"
+    ],
+    "tailscale": {
+      "mode": "serve",
+      "resetOnExit": false
+    }
+  },
   "skills": {
     "install": {
       "nodeManager": "pnpm"
     }
   },
-  "tools": {
-    "deny": [],
-    "elevated": {
-      "enabled": false
-    },
-    "exec": {
-      "ask": "off",
-      "host": "sandbox",
-      "security": "full"
-    },
-    "fs": {
-      "workspaceOnly": false
-    },
-    "web": {
-      "fetch": {
-        "enabled": true
+  "plugins": {
+    "entries": {
+      "acpx": {
+        "enabled": true,
+        "config": {
+          "cwd": "/home/suguan/openclaw-workspace",
+          "permissionMode": "approve-all",
+          "nonInteractivePermissions": "fail"
+        }
       },
-      "search": {
-        "enabled": false
+      "open-prose": {
+        "enabled": true
       }
     }
   }

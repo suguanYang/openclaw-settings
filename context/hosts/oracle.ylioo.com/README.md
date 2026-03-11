@@ -3,7 +3,7 @@
 Last verified: 2026-03-11 UTC
 
 ## Role
-Primary managed OpenClaw deployment and current reference host for this repo.
+Primary tracked OpenClaw deployment and current reference host for this repo.
 
 ## Quick facts
 - SSH target: `oracle.ylioo.com`
@@ -17,7 +17,7 @@ Primary managed OpenClaw deployment and current reference host for this repo.
 ## Read this host in order
 1. `runtime.md`: current live routing, ACP/plugin state, and Discord dispatch behavior.
 2. `deployment.md`: rebuild kit, drift boundary, preferred commands, and snapshot coverage.
-3. `../../../build/oracle.ylioo.com/`: path-faithful build mirror and rebuild book.
+3. `../../../build/oracle.ylioo.com/`: path-faithful build tree and rebuild book.
 4. `repair-notes.md`: caveats discovered during earlier repairs that still matter.
 5. `projects/discord-real-bots.md`: Oracle multi-account Discord workstream.
 6. `runbooks/research-team.md`: operator guidance for the current research team.

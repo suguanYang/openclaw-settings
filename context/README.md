@@ -15,7 +15,7 @@ This directory is the structured knowledge layer for the repo. It exists so oper
 - `hosts/`: host-specific facts, live behavior, rebuild notes, and repair history.
 - `design/`: future-facing function design and accepted decisions.
 - `operation-logs/`: append-only evidence of exact interventions.
-- `build/`: redacted path-faithful live mirror when exact current files matter.
+- `build/`: path-faithful desired rootfs when exact deployment files matter.
 
 ## Writing rules
 - Keep one concern per file.

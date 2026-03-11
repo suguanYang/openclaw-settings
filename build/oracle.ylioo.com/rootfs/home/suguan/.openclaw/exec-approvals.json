@@ -1,9 +1,0 @@
-{
-  "agents": {},
-  "defaults": {},
-  "socket": {
-    "path": "/home/suguan/.openclaw/exec-approvals.sock",
-    "token": "<redacted>"
-  },
-  "version": 1
-}

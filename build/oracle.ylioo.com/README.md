@@ -1,20 +1,23 @@
-# oracle.ylioo.com Build Mirror
+# oracle.ylioo.com Build Tree
 
-This directory is the path-faithful build package for the current Oracle OpenClaw host.
+This directory is the path-faithful desired build tree for the Oracle OpenClaw host.
 
 ## Layout
 - `rootfs/`: host-style file tree rooted at `/`.
+- `secrets.example.env`: secret contract for `.secrets/oracle.ylioo.com.env`.
 - `BUILD.md`: step-by-step rebuild book for this host.
-- `manifest.json`: machine-readable file map with source provenance.
 
 ## Refresh
-Regenerate this package from the current repo state with:
+Edit `rootfs/` directly when you want to change intended Oracle state.
+
+Render and apply it with:
 
 ```sh
-./scripts/oracle-openclaw.sh snapshot
+./scripts/render-build-state.sh --build-dir build/oracle.ylioo.com --secrets-file .secrets/oracle.ylioo.com.env
+./scripts/apply-build-host.sh --host oracle.ylioo.com --secrets-file .secrets/oracle.ylioo.com.env
 ```
 
 ## Important limits
-- Captured files stay redacted in the tracked build mirror.
-- `rootfs/home/suguan/.openclaw/.env` is generated from the tracked profile plus the chosen secrets source.
-- The tracked version uses `managed/secrets.example.env`, so path and variable names are exact, but secret values are blank.
+- `rootfs/home/suguan/.openclaw/.env` contains only tracked non-secret values.
+- Secret values come from `.secrets/oracle.ylioo.com.env` at render/apply time.
+- Untracked live captures belong in `.tmp/live/oracle.ylioo.com/`, not in this directory.

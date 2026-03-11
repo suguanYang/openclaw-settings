@@ -7,7 +7,7 @@ These are historical repair findings that still matter when touching the Oracle 
 ## Notes discovered on 2026-03-09
 - `pnpm add -g openclaw@2026.3.8` succeeds only when `PNPM_HOME=/home/suguan/.local/share/pnpm` is exported.
 - `scripts/oracle-openclaw.sh update` resolves `pnpm` from `PATH` first and falls back to `$PNPM_HOME/pnpm`, which matches the current Oracle host layout.
-- `scripts/apply-managed-host.sh` bootstraps `node` from the live systemd service `ExecStart` (and then NVM as fallback), so non-interactive Oracle applies no longer fail just because `node` is missing from SSH PATH.
+- `scripts/apply-build-host.sh` bootstraps `node` from the live systemd service `ExecStart` (and then NVM as fallback), so non-interactive Oracle applies no longer fail just because `node` is missing from SSH PATH.
 - `openclaw doctor --non-interactive --fix` does not apply service-file repairs.
 - `openclaw doctor --yes --fix` does apply the `systemd` service rewrite in a non-TTY session.
 - `openclaw health` can return a transient loopback `1006` if probed immediately after restart; wait a few seconds before treating that as a real failure.

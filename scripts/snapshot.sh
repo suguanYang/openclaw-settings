@@ -8,8 +8,8 @@ SRC_STAGE="$TMP/src"
 
 # Optional: set OPENCLAW_SNAPSHOT_HOST to capture from a remote host over SSH.
 HOST="${OPENCLAW_SNAPSHOT_HOST:-}"
-BUILD_ID="${HOST:-local}"
-OUT_BASE="$ROOT/build/$BUILD_ID"
+CAPTURE_ID="${HOST:-local}"
+OUT_BASE="$ROOT/.tmp/live/$CAPTURE_ID"
 ROOTFS_OUT="$OUT_BASE/rootfs"
 
 mkdir -p "$OUT_BASE" "$ROOT/.tmp" "$SRC_STAGE"
@@ -140,7 +140,7 @@ else
   SOURCE_ID="local"
 fi
 
-python3 - "$SRC_STAGE" "$OUT_BASE" "$SOURCE_ID" "$ROOT" <<'PY'
+python3 - "$SRC_STAGE" "$OUT_BASE" "$SOURCE_ID" <<'PY'
 import json
 import re
 import shutil
@@ -151,7 +151,6 @@ from pathlib import Path
 src_root = Path(sys.argv[1])
 out_base = Path(sys.argv[2])
 source_id = sys.argv[3]
-root = Path(sys.argv[4])
 rootfs_out = out_base / "rootfs"
 
 SENSITIVE_KEY_NAMES = (
@@ -264,48 +263,13 @@ for src_file in sorted(src_root.rglob("*")):
     )
 
 
-profile_path = root / "profiles" / f"{source_id}.env"
-secrets_contract = root / "managed" / "secrets.example.env"
-openclaw_dirs = sorted(rootfs_out.glob("home/*/.openclaw"))
-
-if profile_path.exists() and secrets_contract.exists() and openclaw_dirs:
-    openclaw_dir = openclaw_dirs[0]
-    env_target = openclaw_dir / ".env"
-    env_target.write_text(
-        "\n".join(
-            [
-                "# Repo-safe generated .env for the build mirror",
-                f"# Host: {source_id}",
-                f"# Profile source: {profile_path.relative_to(root)}",
-                f"# Secrets source: {secrets_contract.relative_to(root)}",
-                "# Variable names and paths match the host layout, but secret values stay blank in git.",
-                profile_path.read_text(encoding="utf-8").rstrip(),
-                "",
-                secrets_contract.read_text(encoding="utf-8").rstrip(),
-                "",
-            ]
-        ),
-        encoding="utf-8",
-    )
-    written.append(
-        {
-            "hostPath": "/" + str(env_target.relative_to(rootfs_out)).replace("\\", "/"),
-            "buildPath": str(env_target.relative_to(out_base)),
-            "sourcePath": f"{profile_path.relative_to(root)} + {secrets_contract.relative_to(root)}",
-            "mode": "generated-env:example",
-        }
-    )
-
-
 manifest = {
     "capturedAtUtc": datetime.now(timezone.utc).isoformat(),
     "source": source_id,
-    "profile": str(profile_path.relative_to(root)) if profile_path.exists() else None,
-    "secretsContract": str(secrets_contract.relative_to(root)) if secrets_contract.exists() else None,
     "fileCount": len(written),
     "files": written,
 }
 write_json(out_base / "manifest.json", manifest)
 PY
 
-echo "build mirror updated in $OUT_BASE"
+echo "live capture updated in $OUT_BASE"
