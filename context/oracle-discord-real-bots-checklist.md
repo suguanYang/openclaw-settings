@@ -1,6 +1,6 @@
 # Oracle Discord Real Bots Checklist
 
-Last updated: 2026-03-10 UTC
+Last updated: 2026-03-11 UTC
 
 ## Goal
 Replace the current single-bot + internal-agent Discord setup with real Discord bot members so `research-lead`, `engineer`, `researcher`, `reporter`, and `tracker` can be mentioned as actual Discord members.
@@ -8,7 +8,14 @@ Replace the current single-bot + internal-agent Discord setup with real Discord 
 ## Current state
 - Oracle currently has one Discord bot account configured in `channels.discord.token`.
 - Internal OpenClaw agents exist for `research-lead`, `engineer`, `researcher`, `reporter`, and `tracker`.
-- Real Discord member mentions are not possible until each teammate has its own Discord bot account.
+- Real Discord member mentions are only partially ready because only 3 of the 5 target bot accounts are in place.
+- Completed bot/member state:
+  - `OpenClaw Manager` exists and is already in `sstar`.
+  - `OpenClaw Engineer` exists and is already in `sstar`.
+  - `OpenClaw Researcher` exists and is already in `sstar`.
+- Pending bot/member state:
+  - `OpenClaw Reporter` creation is blocked by Discord hCaptcha.
+  - `OpenClaw Tracker` creation is blocked by Discord hCaptcha.
 
 ## Fastest migration path
 Reuse the current existing Discord bot as the manager account, then create 4 new Discord bots.
@@ -43,6 +50,11 @@ For each bot app in Discord Developer Portal:
    - Application ID
    - Bot User ID
    - Bot token
+
+## Known application IDs
+- `OpenClaw Manager`: `1481108454704943227`
+- `OpenClaw Engineer`: `1481122055184187432`
+- `OpenClaw Researcher`: `1481133991749750886`
 
 ## Recommended bot names
 - `OpenClaw Manager`
