@@ -8,6 +8,12 @@ Local Git repo for managing, auditing, and documenting host-specific OpenClaw de
 - **Before making claims about OpenClaw behavior, config shape, commands, or features, always check the official docs at `https://docs.openclaw.ai` and the upstream source at `https://github.com/openclaw/openclaw`.**
 - This repo is the source of truth for our intended deployment state, not for generic upstream product behavior.
 
+## Local source reference
+- A gitignored local upstream checkout is available at `references/openclaw/`.
+- LLMs and operators may inspect `references/openclaw/` for faster code-level lookup when diagnosing OpenClaw behavior or matching current implementation details.
+- Keep that checkout up to date before relying on it. At minimum, refresh from upstream and verify the local reference is on the expected branch/commit.
+- The local reference is an aid, not the source of truth. If there is any mismatch between `references/openclaw/`, the official docs, and upstream GitHub, re-check upstream first.
+
 ## Information hierarchy
 Read the repo from broad to narrow:
 1. `README.md`: repo purpose, top-level data layers, and common operator flows.
@@ -20,6 +26,7 @@ Read the repo from broad to narrow:
 - `build/`: path-faithful host build trees plus reference notes for the tracked files.
 - `bootstrap/`: fresh-host rebuild flows kept separate from the current Oracle maintenance scripts.
 - `.secrets/`: gitignored secret env files.
+- `references/openclaw/`: gitignored local clone of the upstream OpenClaw source for code reference only.
 - `operation-logs/`: local-only append-only server interaction logs; kept gitignored.
 - `context/architecture/`: repo-wide model and source-of-truth boundary.
 - `context/hosts/`: per-host dossiers with small, focused docs.
