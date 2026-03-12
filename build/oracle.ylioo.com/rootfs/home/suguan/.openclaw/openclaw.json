@@ -327,7 +327,11 @@
           "image",
           "group:memory",
           "browser",
-          "canvas"
+          "canvas",
+          "knowhere_ingest_document",
+          "knowhere_search_documents",
+          "knowhere_list_documents",
+          "knowhere_remove_document"
         ],
         "deny": [
           "nodes",
@@ -525,6 +529,14 @@
     }
   },
   "plugins": {
+    "allow": [
+      "knowhere"
+    ],
+    "load": {
+      "paths": [
+        "/home/suguan/.openclaw/plugins/knowhere"
+      ]
+    },
     "entries": {
       "acpx": {
         "enabled": true,
@@ -532,6 +544,16 @@
           "cwd": "/home/suguan/openclaw-workspace",
           "permissionMode": "approve-all",
           "nonInteractivePermissions": "fail"
+        }
+      },
+      "knowhere": {
+        "enabled": true,
+        "config": {
+          "storageDir": "/home/suguan/.openclaw/plugin-state/knowhere",
+          "scopeMode": "session",
+          "autoGrounding": true,
+          "maxResults": 4,
+          "minScore": 3
         }
       },
       "open-prose": {
