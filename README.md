@@ -14,8 +14,7 @@ Read the repo from broad to narrow:
 2. `context/README.md`: documentation hierarchy and storage rules.
 3. `context/architecture/`: repo-wide state model and structural rules.
 4. `context/hosts/<host>/`: host dossiers, runbooks, projects, and repair notes.
-5. `context/design/`: future function proposals and accepted design decisions.
-6. `operation-logs/` and `build/`: exact intervention evidence and the path-faithful deploy source.
+5. `operation-logs/` and `build/`: exact intervention evidence and the path-faithful deploy source.
 
 ## Repo layout
 - `build/`: path-faithful host build trees plus reference notes for the tracked files.
@@ -24,7 +23,6 @@ Read the repo from broad to narrow:
 - `operation-logs/`: append-only server interaction logs.
 - `context/architecture/`: repo-wide model and source-of-truth boundary.
 - `context/hosts/`: per-host dossiers with small, focused docs.
-- `context/design/`: future-facing proposals and decisions.
 
 ## Fresh-host rebuild
 1. Install Node 22+ on the target host.
@@ -66,7 +64,7 @@ The rebuild boundary is documented in `context/architecture/source-of-truth.md`.
 ## Documentation update rules
 - Live host behavior changed: update `operation-logs/` plus the smallest relevant file under `context/hosts/<host>/`.
 - Repo-wide policy or storage rules changed: update `context/architecture/`.
-- A new function or workflow is being designed: add a record under `context/design/proposals/` and promote it to `context/design/decisions/` when accepted.
+- Fresh-host setup flow changed: update `bootstrap/README.md` plus the smallest relevant file under `bootstrap/`.
 
 ## Current coverage
 - As of 2026-03-11 UTC, `build/oracle.ylioo.com/rootfs/` + local `.secrets/oracle.ylioo.com.env` are sufficient to recreate the intended Oracle OpenClaw deployment without reading the live host config by hand.
