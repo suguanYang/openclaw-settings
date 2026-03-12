@@ -164,6 +164,14 @@
       "compaction": {
         "mode": "safeguard"
       },
+      "memorySearch": {
+        "enabled": true,
+        "provider": "local",
+        "model": "hf:sentence-transformers/all-MiniLM-L6-v2",
+        "sync": {
+          "watch": true
+        }
+      },
       "maxConcurrent": 4,
       "subagents": {
         "maxConcurrent": 8,
@@ -176,6 +184,9 @@
         "mode": "all",
         "workspaceAccess": "rw",
         "scope": "agent",
+        "browser": {
+          "allowHostControl": true
+        },
         "docker": {
           "image": "openclaw-sandbox:ubuntu-24.04-full",
           "workdir": "/workspace",
@@ -183,7 +194,7 @@
           "network": "bridge",
           "user": "0:0",
           "env": {
-            "GH_CONFIG_DIR": "/root/.config/gh",
+            "GH_CONFIG_DIR": "/workspace/.openclaw/gh",
             "npm_config_nodedir": "/usr"
           },
           "setupCommand": "(git config --global credential.https://github.com.helper \"!gh auth git-credential\" || true) && (sudo -n true >/dev/null 2>&1 || (printf \"#!/usr/bin/env bash\\nexec \\\"\\$@\\\"\\n\" > /usr/local/bin/sudo && chmod +x /usr/local/bin/sudo))",
@@ -222,9 +233,6 @@
             "researcher",
             "tracker"
           ]
-        },
-        "sandbox": {
-          "mode": "off"
         }
       },
       {
@@ -291,12 +299,51 @@
       "enabled": false
     },
     "exec": {
-      "host": "gateway",
+      "host": "sandbox",
       "security": "full",
-      "ask": "off"
+      "ask": "off",
+      "pathPrepend": [
+        "/workspace/.openclaw/bin"
+      ]
     },
     "fs": {
-      "workspaceOnly": false
+      "workspaceOnly": true
+    },
+    "sandbox": {
+      "tools": {
+        "allow": [
+          "read",
+          "edit",
+          "write",
+          "apply_patch",
+          "exec",
+          "process",
+          "sessions_list",
+          "sessions_history",
+          "sessions_send",
+          "sessions_spawn",
+          "subagents",
+          "session_status",
+          "image",
+          "group:memory",
+          "browser",
+          "canvas"
+        ],
+        "deny": [
+          "nodes",
+          "cron",
+          "gateway",
+          "telegram",
+          "whatsapp",
+          "discord",
+          "irc",
+          "googlechat",
+          "slack",
+          "signal",
+          "imessage",
+          "line"
+        ]
+      }
     }
   },
   "bindings": [

@@ -1,6 +1,6 @@
 # Oracle Research Team
 
-Last verified: 2026-03-11 UTC
+Last verified: 2026-03-12 UTC
 
 ## Purpose
 This document describes the research team configured on `oracle.ylioo.com` for the Discord server workflow.
@@ -76,10 +76,19 @@ Rules:
 - All 5 Discord accounts are bound to the same guild channel, but each account wakes only on its own explicit bot mention because the guild requires mentions.
 - Oracle build config also sets `ignoreOtherMentions=true` so a Discord role mention or unrelated member mention is dropped instead of falling through to the manager path.
 - All 5 normal team agents now keep the same basic tool baseline:
-  - browser enabled
-  - gateway-host `exec`
-  - filesystem access not limited to the workspace root
+  - sandboxed `exec`
+  - filesystem writes limited to the agent workspace root
   - no per-agent `exec` deny overrides
+- Browser is now enabled again for sandboxed team agents, backed by the managed Chromium profile at `~/.openclaw/tools/playwright-browsers/chromium-1208/chrome-linux/chrome`.
+- Sandbox policy now explicitly allows `browser`, `canvas`, and `group:memory`, while still denying `nodes` and channel-control tools.
+- `agents.defaults.sandbox.browser.allowHostControl = true`, so sandboxed agents can target host Chromium when needed.
+- Verified on 2026-03-11 UTC: sandboxed `researcher` successfully browsed `https://example.com` and returned `Example Domain`.
+- Verified on 2026-03-12 UTC: Oracle gateway has `0` paired and `0` connected nodes, so `canvas` is exposed but will not render until a node is paired.
+- Sandbox policy now explicitly allows `group:memory`, so `memory_search` and `memory_get` are available again inside sandboxed Codex sessions.
+- Memory search now uses the local provider model `hf:sentence-transformers/all-MiniLM-L6-v2`; the first host warm-up required a user-space `cmake` install under `~/.local/bin`.
+- The sandboxed GitHub CLI path comes from each agent workspace:
+  - `/workspace/.openclaw/bin/gh`
+  - `/workspace/.openclaw/gh`
 - `research-lead` still has managed alias logic in `~/.openclaw/workspace-research-lead/AGENTS.md`, but that is now a fallback path rather than the primary routing model.
 - `TEAM.md` in workspace snapshots is operator documentation only and is not auto-injected into the runtime bootstrap prompt on this OpenClaw checkout.
 - `openclaw health` reports only the default Discord account; use gateway logs to verify all 5 accounts after restart.

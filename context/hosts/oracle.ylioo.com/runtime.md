@@ -1,6 +1,6 @@
 # oracle.ylioo.com Runtime
 
-Last verified: 2026-03-11 UTC
+Last verified: 2026-03-12 UTC
 
 ## Current host facts
 - SSH target: `oracle.ylioo.com`
@@ -57,12 +57,22 @@ Last verified: 2026-03-11 UTC
 - Global sandbox defaults keep `docker.binds=[]`.
 - The earlier engineer-only GitHub CLI bind-mount workaround was removed from the normal engineer agent path on 2026-03-11 because it blocked manager-spawned engineer subagents.
 - All 5 normal team agents now share the same basic tool baseline:
-  - browser enabled through the bundled Playwright/Chromium path
-  - `tools.exec.host = gateway` with `ask = off`
-  - `tools.fs.workspaceOnly = false`
+  - `tools.exec.host = sandbox` with `ask = off`
+  - `tools.exec.pathPrepend = ["/workspace/.openclaw/bin"]`
+  - `tools.fs.workspaceOnly = true`
   - no per-agent `exec` deny blocks remain
-- The live `~/.openclaw/exec-approvals.json` currently has empty `defaults` and `agents` maps, so the `gateway` exec baseline is controlled by `openclaw.json` rather than extra per-agent approval rules.
-- Raw helper-shell commands such as `./scripts/oracle-openclaw.sh exec "gh ..."` still hit the non-interactive PATH caveat; the normal agent `exec` tool path does resolve `gh` correctly on this host.
+- The gateway host browser subsystem is enabled globally and uses the managed Chromium path `/home/suguan/.openclaw/tools/playwright-browsers/chromium-1208/chrome-linux/chrome`.
+- Sandbox tool policy now explicitly allows `browser`, `canvas`, and `group:memory`, while still denying `nodes` and channel-control tools for normal team-agent sessions.
+- `agents.defaults.sandbox.browser.allowHostControl = true`, so sandboxed agents can target the host Chromium profile when needed.
+- Verified on 2026-03-11 UTC: sandboxed `researcher` used the browser tool successfully against `https://example.com` and returned `Example Domain`.
+- Verified on 2026-03-12 UTC: Oracle gateway has `0` paired and `0` connected nodes, so `canvas` is exposed to team agents but remains unusable until a node is paired.
+- Sandboxed Codex sessions now expose `memory_search` and `memory_get` without reopening host writes.
+- `agents.defaults.memorySearch` is now enabled with the local provider model `hf:sentence-transformers/all-MiniLM-L6-v2`.
+- Oracle needed a user-space `cmake` install at `~/.local/bin/cmake` so the first local `node-llama-cpp` build could complete on arm64.
+- Global sandbox env now points `GH_CONFIG_DIR` at `/workspace/.openclaw/gh`, so each sandboxed agent uses GitHub CLI state copied into its own workspace rather than the host home directory.
+- `research-lead` no longer overrides sandboxing off; it now inherits the same per-agent sandbox defaults as the other team members.
+- The live `~/.openclaw/exec-approvals.json` currently has empty `defaults` and `agents` maps, so no extra gateway-host exec approvals are in play for the team baseline.
+- With the current sandboxed setup, `~/...` writes from normal agent `exec` land inside the sandbox container rather than the Oracle host home directory; only files written under `/workspace` persist back to the host agent workspace.
 - For heavier repo work, multi-step coding, or GitHub-auth-sensitive flows, prefer Claude ACP threads over ad hoc normal-agent shell usage.
 - Preferred engineer smoke test:
   - `./scripts/oracle-openclaw.sh runtime-exec 'run_openclaw agent --agent engineer --message "Reply with exactly: engineer ok" --json'`

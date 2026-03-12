@@ -148,14 +148,14 @@ upload_rootfs_to_remote() {
   local status=0
   tmp="$(mktemp)"
 
-  if tar -cf - -C "$src_dir" . | ssh "$HOST" "tar -xf - -C /" >"$tmp" 2>&1; then
+  if tar -cf - -C "$src_dir" . | ssh "$HOST" "tar --no-overwrite-dir -xf - -C /" >"$tmp" 2>&1; then
     status=0
   else
     status=$?
   fi
 
   cat "$tmp"
-  append_log "$action" "tar -cf - -C $(printf '%q' "$src_dir") . | ssh $(printf '%q' "$HOST") tar -xf - -C /" "$status" "$tmp"
+  append_log "$action" "tar -cf - -C $(printf '%q' "$src_dir") . | ssh $(printf '%q' "$HOST") tar --no-overwrite-dir -xf - -C /" "$status" "$tmp"
   rm -f "$tmp"
   return "$status"
 }
