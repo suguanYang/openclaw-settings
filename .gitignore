@@ -9,6 +9,7 @@
 /operation-logs/
 /snapshots/
 /build/**/.openclaw/plugins/
+/build/**/*.bak*
 
 # If you ever place raw exports here, keep them out of git
 *.raw.json
