@@ -14,13 +14,13 @@ Read the repo from broad to narrow:
 2. `context/README.md`: documentation hierarchy and storage rules.
 3. `context/architecture/`: repo-wide state model and structural rules.
 4. `context/hosts/<host>/`: host dossiers, runbooks, projects, and repair notes.
-5. `operation-logs/` and `build/`: exact intervention evidence and the path-faithful deploy source.
+5. `operation-logs/` and `build/`: local intervention evidence plus the path-faithful deploy source.
 
 ## Repo layout
 - `build/`: path-faithful host build trees plus reference notes for the tracked files.
 - `bootstrap/`: fresh-host rebuild flows kept separate from the current Oracle maintenance scripts.
 - `.secrets/`: gitignored secret env files.
-- `operation-logs/`: append-only server interaction logs.
+- `operation-logs/`: local-only append-only server interaction logs; kept gitignored.
 - `context/architecture/`: repo-wide model and source-of-truth boundary.
 - `context/hosts/`: per-host dossiers with small, focused docs.
 
@@ -50,6 +50,8 @@ use the bootstrap flow in `bootstrap/oracle.ylioo.com/`, or just run
 - Never commit plaintext secrets.
 - `build/` is tracked; `.secrets/` is local only.
 - `build/` and `operation-logs/` must contain only redacted or placeholder-safe values.
+- `operation-logs/` is local-only and must not be pushed.
+- Local plugin payloads under `build/**/.openclaw/plugins/` must stay gitignored.
 
 ## State model
 The rebuild boundary is documented in `context/architecture/source-of-truth.md`.
@@ -62,7 +64,7 @@ The rebuild boundary is documented in `context/architecture/source-of-truth.md`.
 - `./scripts/oracle-openclaw.sh snapshot` now captures a redacted live tree into `.tmp/live/<host>/` for comparison only.
 
 ## Documentation update rules
-- Live host behavior changed: update `operation-logs/` plus the smallest relevant file under `context/hosts/<host>/`.
+- Live host behavior changed: update local `operation-logs/` plus the smallest relevant file under `context/hosts/<host>/`.
 - Repo-wide policy or storage rules changed: update `context/architecture/`.
 - Fresh-host setup flow changed: update `bootstrap/README.md` plus the smallest relevant file under `bootstrap/`.
 

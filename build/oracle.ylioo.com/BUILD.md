@@ -26,6 +26,7 @@ Typical tracked files here:
 ## What This Directory Does Not Contain
 
 - Real secret values
+- Tracked local plugin bundles under `rootfs/home/suguan/.openclaw/plugins/`
 - Generated control UI assets
 - Browser/runtime tool downloads
 - Thread bindings, device state, backups, logs, or other runtime-only state
