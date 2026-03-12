@@ -67,7 +67,7 @@ Last verified: 2026-03-12 UTC
 - Verified on 2026-03-11 UTC: sandboxed `researcher` used the browser tool successfully against `https://example.com` and returned `Example Domain`.
 - Verified on 2026-03-12 UTC: Oracle gateway has `0` paired and `0` connected nodes, so `canvas` is exposed to team agents but remains unusable until a node is paired.
 - Oracle now ships a managed local plugin payload at `~/.openclaw/plugins/knowhere`, trusts it via `plugins.allow = ["knowhere"]`, and loads it through `plugins.load.paths`.
-- Sandbox policy now also allows `knowhere_ingest_document`, `knowhere_search_documents`, `knowhere_list_documents`, `knowhere_remove_document`, and `knowhere_clear_scope`.
+- Sandbox policy now also allows `knowhere_ingest_document`, `knowhere_search_documents`, `knowhere_get_job_status`, `knowhere_list_documents`, `knowhere_remove_document`, and `knowhere_clear_scope`.
 - `plugins.entries.knowhere` is enabled with `scopeMode=session`, `autoGrounding=false`, and `storageDir=/home/suguan/.openclaw/plugin-state/knowhere`.
 - The tracked Knowhere config stays session-scoped, but usage is now manual: agents decide whether to call `knowhere_*` tools, and the plugin does not auto-ingest attachments or auto-ground prompts.
 - In manual mode, agents should pass attachment marker paths as `filePath` and the visible attachment name as `fileName` when calling `knowhere_ingest_document`, so Knowhere preserves the original filename instead of a temporary UUID path.

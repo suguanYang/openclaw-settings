@@ -84,7 +84,8 @@ Rules:
 - `agents.defaults.sandbox.browser.allowHostControl = true`, so sandboxed agents can target host Chromium when needed.
 - Verified on 2026-03-11 UTC: sandboxed `researcher` successfully browsed `https://example.com` and returned `Example Domain`.
 - Verified on 2026-03-12 UTC: Oracle gateway has `0` paired and `0` connected nodes, so `canvas` is exposed but will not render until a node is paired.
-- Oracle now ships the local Knowhere plugin from `~/.openclaw/plugins/knowhere`, trusts it explicitly in `plugins.allow`, and enables its five tools for sandboxed team agents.
+- Oracle now ships the local Knowhere plugin from `~/.openclaw/plugins/knowhere`, trusts it explicitly in `plugins.allow`, and enables its six tools for sandboxed team agents.
+- `knowhere_get_job_status` lets agents query `GET /v1/jobs/{job_id}` directly, so Tracker can answer job-ID status questions even when no parsed document is currently present in the local store.
 - `plugins.entries.knowhere` now uses `scopeMode=session` with `autoGrounding=false`; same-conversation team bots and their spawned subagents share Knowhere docs through plugin-side scope resolution instead of a host-wide global corpus, but they must invoke `knowhere_*` tools manually.
 - Manual attachment ingests should pass the marker path as `filePath` and the visible attachment label as `fileName`, so later `knowhere_list_documents` output can report the real original filename instead of the temporary saved path.
 - Knowhere plugin state is stored separately under `~/.openclaw/plugin-state/knowhere`, so parsed documents do not mix with the plugin package files.
