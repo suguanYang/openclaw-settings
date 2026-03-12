@@ -18,7 +18,7 @@ Read the repo from broad to narrow:
 6. `operation-logs/` and `build/`: exact intervention evidence and the path-faithful deploy source.
 
 ## Repo layout
-- `build/`: path-faithful host build trees plus step-by-step rebuild books.
+- `build/`: path-faithful host build trees plus reference notes for the tracked files.
 - `bootstrap/`: fresh-host rebuild flows kept separate from the current Oracle maintenance scripts.
 - `.secrets/`: gitignored secret env files.
 - `operation-logs/`: append-only server interaction logs.

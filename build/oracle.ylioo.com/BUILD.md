@@ -1,38 +1,21 @@
 # Build Oracle OpenClaw
 
-This book explains how to rebuild the current Oracle host using the path-faithful build tree in this directory.
+This file documents the role of `build/oracle.ylioo.com/` as a path-faithful
+deploy tree.
 
-If you are cloning the current Oracle deployment onto a different host and want
-the bootstrap flow without changing the existing Oracle maintenance
-scripts, use `../../bootstrap/oracle.ylioo.com/README.md`.
+It is no longer the main setup guide for cloning Oracle onto another host.
+Use `../../bootstrap/oracle.ylioo.com/README.md` or `./bootstrap/setup.sh` for
+the actual bootstrap workflow.
 
-## Before touching the host
-1. Re-check the official OpenClaw docs at `https://docs.openclaw.ai` and the upstream source at `https://github.com/openclaw/openclaw`.
-2. Review `rootfs/` in this folder so you understand the exact host paths that will exist on Oracle.
-3. Review `secrets.example.env` so you know which secret values must be provided locally.
+## What This Directory Is For
 
-## What this folder gives you
-- Exact host-style paths under `rootfs/`, such as:
-  - `rootfs/home/suguan/.openclaw/openclaw.json`
-  - `rootfs/home/suguan/.openclaw/.env`
-  - `rootfs/home/suguan/.claude/settings.json`
-  - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
-- A repo-safe mirror of the current tracked host configuration.
-- A manual rebuild reference when you need to reason in host paths instead of repo layers.
+- Keep the exact tracked host-style files under `rootfs/`.
+- Show which Oracle files are declarative build state versus runtime state.
+- Give operators one place to inspect or edit the files that bootstrap will
+  render and upload.
 
-## What this folder does not give you by default
-- Live secret values.
-- Runtime-only state such as device pairings, thread bindings, backups, and the generated service file.
+Typical tracked files here:
 
-## Step 1: Prepare secrets locally
-1. Copy `secrets.example.env` to `.secrets/oracle.ylioo.com.env`.
-2. Fill the real values locally.
-3. Do not commit that file.
-
-## Step 2: Edit the build tree
-Edit the tracked files under `rootfs/` until they match the intended Oracle state.
-
-Typical files:
 - `rootfs/home/suguan/.openclaw/openclaw.json`
 - `rootfs/home/suguan/.openclaw/.env`
 - `rootfs/home/suguan/.openclaw/acp-harness.env`
@@ -40,38 +23,54 @@ Typical files:
 - `rootfs/home/suguan/.claude/settings.json`
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
 
-## Step 3: Render locally
+## What This Directory Does Not Contain
+
+- Real secret values
+- Generated control UI assets
+- Browser/runtime tool downloads
+- Thread bindings, device state, backups, logs, or other runtime-only state
+- The generated `openclaw-gateway.service`
+
+Those boundaries are intentional. The tracked build tree is for desired config,
+not live operational residue.
+
+## Secrets Contract
+
+- `secrets.example.env` is the contract for local-only secrets.
+- The real file should live at `.secrets/oracle.ylioo.com.env`.
+- Do not commit that file.
+
+## How This Tree Is Used
+
+The bootstrap flow reads this tree, merges in local secrets, renders the staged
+output, and then uploads it to the target host.
+
+If you want to inspect the rendered result without applying it:
 
 ```sh
-./scripts/render-build-state.sh \
-  --build-dir build/oracle.ylioo.com \
-  --secrets-file .secrets/oracle.ylioo.com.env
+./bootstrap/setup.sh --profile oracle.ylioo.com --render-only
 ```
 
-## Step 4: Prepare the target host
-1. Install Node 22+ on the target host.
-2. Ensure the target account is `suguan` or adjust the build tree first.
-3. Create the required base directories:
-   - `/home/suguan/.openclaw`
-   - `/home/suguan/.claude`
-   - `/home/suguan/.config/systemd/user/openclaw-gateway.service.d`
-
-## Step 5: Apply the build tree
-The recommended deployment path is:
+If you want the full guided setup flow:
 
 ```sh
-./scripts/apply-build-host.sh \
-  --host oracle.ylioo.com \
-  --secrets-file .secrets/oracle.ylioo.com.env
+./bootstrap/setup.sh
 ```
 
-## Step 6: Repair and verify
-1. Run `./scripts/oracle-openclaw.sh status`
-2. Run `./scripts/oracle-openclaw.sh health`
-3. Run `./scripts/oracle-openclaw.sh logs 120`
-4. If you need a redacted live comparison, run `./scripts/oracle-openclaw.sh snapshot`.
+## When To Edit This Directory
 
-## Step 7: Update the repo after rebuild
-1. Keep `build/` aligned with the intended deployed state.
-2. Record the intervention in `operation-logs/`.
-3. Update host docs if the behavior or layout changed.
+Edit files under `rootfs/` when the intended Oracle deployment state changes.
+
+Examples:
+
+- OpenClaw config changes
+- workspace prompt changes
+- tracked environment defaults
+- managed service drop-ins
+
+After changing the intended state:
+
+1. Keep `build/` aligned with what you intend to deploy.
+2. Use the bootstrap flow to render or apply it.
+3. Record real server interventions in `operation-logs/`.
+4. Update the relevant host docs if behavior changed.

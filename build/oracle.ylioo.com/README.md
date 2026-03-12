@@ -5,12 +5,18 @@ This directory is the path-faithful desired build tree for the Oracle OpenClaw h
 ## Layout
 - `rootfs/`: host-style file tree rooted at `/`.
 - `secrets.example.env`: secret contract for `.secrets/oracle.ylioo.com.env`.
-- `BUILD.md`: step-by-step rebuild book for this host.
+- `BUILD.md`: build-tree reference for this host, with pointers to the bootstrap workflow.
 
 ## Refresh
 Edit `rootfs/` directly when you want to change intended Oracle state.
 
-Render and apply it with:
+For the actual guided setup flow, use:
+
+```sh
+./bootstrap/setup.sh
+```
+
+If you want the lower-level render/apply commands directly, they are:
 
 ```sh
 ./scripts/render-build-state.sh --build-dir build/oracle.ylioo.com --secrets-file .secrets/oracle.ylioo.com.env

@@ -5,7 +5,7 @@ This directory contains host-specific build packages.
 ## Purpose
 - Keep the path-faithful desired host configuration under `rootfs/`.
 - Give operators and LLMs one place to inspect and edit the exact files that will be pushed to the server.
-- Keep a step-by-step rebuild book next to the mirrored files.
+- Keep reference notes next to the mirrored files while the user-facing setup workflow lives under `bootstrap/`.
 
 ## Rules
 - `build/` is the primary tracked deploy source.
