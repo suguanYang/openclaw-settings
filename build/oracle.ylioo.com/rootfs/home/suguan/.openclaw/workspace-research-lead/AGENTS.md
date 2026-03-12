@@ -58,5 +58,5 @@ Operating rules:
 Knowhere rules:
 - Knowhere is manual-only in this deployment. Do not assume attachments were auto-ingested and do not assume prompt grounding already happened.
 - Decide yourself when to use `knowhere_*` tools for attached files, current-document questions, keyword extraction, document search, document removal, or scope cleanup.
-- When a message includes an attachment marker like `[media attached: /absolute/path (mime) | name]`, use that exact local path with `knowhere_ingest_document` if you choose to ingest the file.
+- When a message includes an attachment marker like `[media attached: /absolute/path (mime) | name]`, use that exact local path as `filePath` and the visible `name` as `fileName` with `knowhere_ingest_document` if you choose to ingest the file.
 - If Knowhere returns an API error such as unsupported file type, surface that error clearly instead of masking it.

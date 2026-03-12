@@ -86,6 +86,7 @@ Rules:
 - Verified on 2026-03-12 UTC: Oracle gateway has `0` paired and `0` connected nodes, so `canvas` is exposed but will not render until a node is paired.
 - Oracle now ships the local Knowhere plugin from `~/.openclaw/plugins/knowhere`, trusts it explicitly in `plugins.allow`, and enables its five tools for sandboxed team agents.
 - `plugins.entries.knowhere` now uses `scopeMode=session` with `autoGrounding=false`; same-conversation team bots and their spawned subagents share Knowhere docs through plugin-side scope resolution instead of a host-wide global corpus, but they must invoke `knowhere_*` tools manually.
+- Manual attachment ingests should pass the marker path as `filePath` and the visible attachment label as `fileName`, so later `knowhere_list_documents` output can report the real original filename instead of the temporary saved path.
 - Knowhere plugin state is stored separately under `~/.openclaw/plugin-state/knowhere`, so parsed documents do not mix with the plugin package files.
 - The plugin package now defers unsupported file-type errors to the Knowhere API instead of blocking them with local attachment validation.
 - `KNOWHERE_API_KEY` is not configured yet in `.secrets/oracle.ylioo.com.env`, so the plugin loads but Knowhere API-backed ingest operations will fail until credentials are added.
