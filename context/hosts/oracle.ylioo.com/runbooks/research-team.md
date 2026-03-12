@@ -84,10 +84,10 @@ Rules:
 - `agents.defaults.sandbox.browser.allowHostControl = true`, so sandboxed agents can target host Chromium when needed.
 - Verified on 2026-03-11 UTC: sandboxed `researcher` successfully browsed `https://example.com` and returned `Example Domain`.
 - Verified on 2026-03-12 UTC: Oracle gateway has `0` paired and `0` connected nodes, so `canvas` is exposed but will not render until a node is paired.
-- Oracle now ships the local Knowhere plugin from `~/.openclaw/plugins/knowhere`, trusts it explicitly in `plugins.allow`, and enables its four tools for sandboxed team agents.
-- `plugins.entries.knowhere` now uses `scopeMode=session`; same-conversation team bots and their spawned subagents share Knowhere docs through plugin-side scope resolution instead of a host-wide global corpus.
+- Oracle now ships the local Knowhere plugin from `~/.openclaw/plugins/knowhere`, trusts it explicitly in `plugins.allow`, and enables its five tools for sandboxed team agents.
+- `plugins.entries.knowhere` now uses `scopeMode=session` with `autoGrounding=false`; same-conversation team bots and their spawned subagents share Knowhere docs through plugin-side scope resolution instead of a host-wide global corpus, but they must invoke `knowhere_*` tools manually.
 - Knowhere plugin state is stored separately under `~/.openclaw/plugin-state/knowhere`, so parsed documents do not mix with the plugin package files.
-- The plugin package still needs code follow-up in `~/github.com/ontosAI/knowhere-openclaw-plugin` to align more closely with `~/github.com/ontosAI/knowhere-python-sdk`, especially around image-result loading and ingest retry semantics.
+- The plugin package now defers unsupported file-type errors to the Knowhere API instead of blocking them with local attachment validation.
 - `KNOWHERE_API_KEY` is not configured yet in `.secrets/oracle.ylioo.com.env`, so the plugin loads but Knowhere API-backed ingest operations will fail until credentials are added.
 - Sandbox policy now explicitly allows `group:memory`, so `memory_search` and `memory_get` are available again inside sandboxed Codex sessions.
 - Memory search now uses the local provider model `hf:sentence-transformers/all-MiniLM-L6-v2`; the first host warm-up required a user-space `cmake` install under `~/.local/bin`.

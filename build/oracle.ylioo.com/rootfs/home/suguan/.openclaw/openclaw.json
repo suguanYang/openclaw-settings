@@ -331,7 +331,8 @@
           "knowhere_ingest_document",
           "knowhere_search_documents",
           "knowhere_list_documents",
-          "knowhere_remove_document"
+          "knowhere_remove_document",
+          "knowhere_clear_scope"
         ],
         "deny": [
           "nodes",
@@ -551,7 +552,7 @@
         "config": {
           "storageDir": "/home/suguan/.openclaw/plugin-state/knowhere",
           "scopeMode": "session",
-          "autoGrounding": true,
+          "autoGrounding": false,
           "maxResults": 4,
           "minScore": 3
         }
