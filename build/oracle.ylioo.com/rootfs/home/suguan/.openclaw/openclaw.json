@@ -328,12 +328,7 @@
           "group:memory",
           "browser",
           "canvas",
-          "knowhere_ingest_document",
-          "knowhere_search_documents",
-          "knowhere_get_job_status",
-          "knowhere_list_documents",
-          "knowhere_remove_document",
-          "knowhere_clear_scope"
+          "knowhere_*"
         ],
         "deny": [
           "nodes",
