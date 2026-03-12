@@ -1,11 +1,11 @@
 # oracle.ylioo.com Repair Notes
 
-Last verified: 2026-03-11 UTC
+Last verified: 2026-03-12 UTC
 
 These are historical repair findings that still matter when touching the Oracle host.
 
 ## Notes discovered on 2026-03-09
-- `pnpm add -g openclaw@2026.3.8` succeeds only when `PNPM_HOME=/home/suguan/.local/share/pnpm` is exported.
+- `pnpm add -g openclaw@latest` succeeds only when `PNPM_HOME=/home/suguan/.local/share/pnpm` is exported.
 - `scripts/oracle-openclaw.sh update` resolves `pnpm` from `PATH` first and falls back to `$PNPM_HOME/pnpm`, which matches the current Oracle host layout.
 - `scripts/apply-build-host.sh` bootstraps `node` from the live systemd service `ExecStart` (and then NVM as fallback), so non-interactive Oracle applies no longer fail just because `node` is missing from SSH PATH.
 - `openclaw doctor --non-interactive --fix` does not apply service-file repairs.

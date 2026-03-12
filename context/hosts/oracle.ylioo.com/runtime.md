@@ -7,10 +7,10 @@ Last verified: 2026-03-12 UTC
 - Host OS: Ubuntu 20.04.6 LTS (`focal`) on `aarch64`
 - State dir: `~/.openclaw`
 - Active service: `~/.config/systemd/user/openclaw-gateway.service`
-- Observed running version: `v2026.3.8`
+- Observed running version: `v2026.3.11`
 - Observed service port: `18789`
 - ExecStart node: `/home/suguan/.nvm/versions/node/v22.18.0/bin/node`
-- ExecStart entrypoint: `/home/suguan/.local/share/pnpm/global/5/.pnpm/openclaw@2026.3.8_.../node_modules/openclaw/dist/index.js`
+- ExecStart entrypoint: `/home/suguan/.local/share/pnpm/global/5/.pnpm/openclaw@2026.3.11_.../node_modules/openclaw/dist/index.js`
 - Shell PATH caveat: non-interactive `zsh -lc` does not resolve `openclaw`, `node`, `npm`, `pnpm`, or `gh`; use absolute paths or `scripts/oracle-openclaw.sh`.
 - PNPM caveat: global writes require `PNPM_HOME=/home/suguan/.local/share/pnpm`.
 

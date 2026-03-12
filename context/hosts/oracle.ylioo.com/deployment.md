@@ -1,6 +1,6 @@
 # oracle.ylioo.com Deployment
 
-Last verified: 2026-03-11 UTC
+Last verified: 2026-03-12 UTC
 
 ## Current build tree
 - The tracked build tree is the intended Oracle deploy source.
@@ -46,7 +46,7 @@ Docs prefer re-running `curl -fsSL https://openclaw.ai/install.sh | bash`; for t
 
 ## Freshness notes
 - Local reference repo `/home/suguan/github.com/openclaw` has uncommitted local files right now, so it was not auto-fast-forwarded during this sync pass.
-- Live Oracle deployment was verified against the current installed OpenClaw `v2026.3.8` on 2026-03-11.
+- Live Oracle deployment was verified against the current installed OpenClaw `v2026.3.11` on 2026-03-12.
 
 ## Official docs checked
 - Install: `https://docs.openclaw.ai/install`

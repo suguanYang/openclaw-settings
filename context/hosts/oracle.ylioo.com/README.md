@@ -1,6 +1,6 @@
 # oracle.ylioo.com
 
-Last verified: 2026-03-11 UTC
+Last verified: 2026-03-12 UTC
 
 ## Role
 Primary tracked OpenClaw deployment and current reference host for this repo.
@@ -10,7 +10,7 @@ Primary tracked OpenClaw deployment and current reference host for this repo.
 - Host OS: Ubuntu 20.04.6 LTS (`focal`) on `aarch64`
 - State dir: `~/.openclaw`
 - Active service: `~/.config/systemd/user/openclaw-gateway.service`
-- Observed running version: `v2026.3.8`
+- Observed running version: `v2026.3.11`
 - Observed service port: `18789`
 - Preferred helper script: `./scripts/oracle-openclaw.sh`
 
