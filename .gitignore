@@ -6,6 +6,7 @@
 # Runtime scratch
 .tmp/
 .secrets/
+/references/openclaw/
 /operation-logs/
 /snapshots/
 /build/**/.openclaw/plugins/
