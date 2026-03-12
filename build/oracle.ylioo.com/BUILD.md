@@ -2,6 +2,10 @@
 
 This book explains how to rebuild the current Oracle host using the path-faithful build tree in this directory.
 
+If you are cloning the current Oracle deployment onto a different host and want
+the bootstrap flow without changing the existing Oracle maintenance
+scripts, use `../../bootstrap/oracle.ylioo.com/README.md`.
+
 ## Before touching the host
 1. Re-check the official OpenClaw docs at `https://docs.openclaw.ai` and the upstream source at `https://github.com/openclaw/openclaw`.
 2. Review `rootfs/` in this folder so you understand the exact host paths that will exist on Oracle.

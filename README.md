@@ -19,6 +19,7 @@ Read the repo from broad to narrow:
 
 ## Repo layout
 - `build/`: path-faithful host build trees plus step-by-step rebuild books.
+- `bootstrap/`: fresh-host rebuild flows kept separate from the current Oracle maintenance scripts.
 - `.secrets/`: gitignored secret env files.
 - `operation-logs/`: append-only server interaction logs.
 - `context/architecture/`: repo-wide model and source-of-truth boundary.
@@ -33,6 +34,10 @@ Read the repo from broad to narrow:
    `./scripts/apply-build-host.sh --host <ssh-host> --secrets-file .secrets/<host>.env`
 5. Optionally capture the live host into `.tmp/live/<host>/` for comparison:
    `OPENCLAW_SNAPSHOT_HOST=<ssh-host> ./scripts/snapshot.sh`
+
+For a reproducible clone of the current Oracle deployment on a different host,
+use the bootstrap flow in `bootstrap/oracle.ylioo.com/`, or just run
+`./bootstrap/setup.sh`.
 
 ## Oracle helper flow
 - Status: `./scripts/oracle-openclaw.sh status`

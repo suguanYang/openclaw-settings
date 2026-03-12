@@ -1,19 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BUILD_DIR=""
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+BUILD_DIR="$ROOT/build/oracle.ylioo.com"
 SECRETS_FILE=""
-OUT_DIR=""
+OUT_DIR="$ROOT/.tmp/bootstrap-rendered/oracle.ylioo.com"
 
 usage() {
   cat <<'USAGE'
-Usage: ./scripts/render-build-state.sh --build-dir <build/host> --secrets-file <.secrets/host.env> [--out-dir <dir>]
+Usage: ./bootstrap/oracle.ylioo.com/render-build-state.sh [--build-dir <build/host>] --secrets-file <.secrets/host.env> [--out-dir <dir>]
 
-Renders a tracked OpenClaw build rootfs into a temp directory without writing secrets into git.
-Expected build layout:
-  build/<host>/rootfs/
-  build/<host>/secrets.example.env
+Renders a tracked OpenClaw build rootfs into a temp directory without writing
+secrets into git.
 USAGE
 }
 
@@ -43,7 +41,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if [ -z "$BUILD_DIR" ] || [ -z "$SECRETS_FILE" ]; then
+if [ -z "$SECRETS_FILE" ]; then
   usage >&2
   exit 1
 fi
@@ -56,11 +54,6 @@ fi
 if [ ! -f "$SECRETS_FILE" ]; then
   echo "missing secrets file: $SECRETS_FILE" >&2
   exit 1
-fi
-
-if [ -z "$OUT_DIR" ]; then
-  build_name="$(basename "$BUILD_DIR")"
-  OUT_DIR="$ROOT/.tmp/rendered-build/$build_name"
 fi
 
 rm -rf "$OUT_DIR"
@@ -99,7 +92,6 @@ env_template = env_templates[0]
 rendered_env = out_dir / env_template.relative_to(rootfs_dir)
 
 optional_blank = {"ANTHROPIC_AUTH_TOKEN"}
-ignored_tokens = {"PURE"}
 token_re = re.compile(r"__([A-Z0-9_]+)__")
 
 
@@ -108,12 +100,10 @@ def render_tokens(text: str) -> str:
 
     def replace(match: re.Match[str]) -> str:
         key = match.group(1)
-        if key in ignored_tokens:
+        if key not in os.environ:
             return match.group(0)
         value = os.environ.get(key)
-        if key in optional_blank and (value is None or value == ""):
-            return ""
-        if value is None or value == "":
+        if value == "" and key not in optional_blank:
             missing.add(key)
             return match.group(0)
         return value
@@ -122,22 +112,9 @@ def render_tokens(text: str) -> str:
     if missing:
         missing_names = ", ".join(sorted(missing))
         raise SystemExit(f"missing render variables: {missing_names}")
-    unresolved = sorted(
-        {
-            match.group(1)
-            for match in token_re.finditer(rendered)
-            if match.group(1) not in ignored_tokens
-        }
-    )
-    if unresolved:
-        unresolved_names = ", ".join(unresolved)
-        raise SystemExit(
-            f"unresolved __VAR__ placeholders remain after render: {unresolved_names}"
-        )
     return rendered
 
 
-# Merge the tracked non-secret env template with the local-only secrets file.
 env_text = "\n".join(
     [
         env_template.read_text(encoding="utf-8").rstrip(),
@@ -148,8 +125,6 @@ env_text = "\n".join(
 )
 rendered_env.write_text(env_text, encoding="utf-8")
 
-
-# Render any remaining __VAR__ placeholders in the staged tree.
 for file_path in sorted(out_dir.rglob("*")):
     if not file_path.is_file():
         continue
@@ -157,7 +132,6 @@ for file_path in sorted(out_dir.rglob("*")):
     if "__" not in text:
         continue
     file_path.write_text(render_tokens(text).rstrip() + "\n", encoding="utf-8")
-
 
 print(out_dir)
 PY
