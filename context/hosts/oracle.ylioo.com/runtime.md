@@ -69,6 +69,8 @@ Last verified: 2026-03-12 UTC
 - Oracle now ships a managed local plugin payload at `~/.openclaw/plugins/knowhere`, trusts it via `plugins.allow = ["knowhere"]`, and loads it through `plugins.load.paths`.
 - Sandbox policy now also allows `knowhere_ingest_document`, `knowhere_search_documents`, `knowhere_list_documents`, and `knowhere_remove_document`.
 - `plugins.entries.knowhere` is enabled with `scopeMode=session`, `autoGrounding=true`, and `storageDir=/home/suguan/.openclaw/plugin-state/knowhere`.
+- The tracked Knowhere config now stays session-scoped and relies on plugin-side conversation and subagent scope sharing instead of a host-wide global corpus.
+- The local plugin repo `~/github.com/ontosAI/knowhere-openclaw-plugin` now carries the pending Knowhere SDK-alignment changes for image-result loading, upload flow, retry behavior, and shared-scope resolution.
 - `.secrets/oracle.ylioo.com.env` does not currently define `KNOWHERE_API_KEY`, so the plugin can load plus list/search/remove locally stored docs, but new Knowhere ingestion calls will fail until credentials are added.
 - Sandboxed Codex sessions now expose `memory_search` and `memory_get` without reopening host writes.
 - `agents.defaults.memorySearch` is now enabled with the local provider model `hf:sentence-transformers/all-MiniLM-L6-v2`.
