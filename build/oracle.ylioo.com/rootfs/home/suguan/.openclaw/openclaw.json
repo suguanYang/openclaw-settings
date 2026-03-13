@@ -428,6 +428,9 @@
   "channels": {
     "discord": {
       "enabled": true,
+      "allowFrom": [
+        "476950196589428738"
+      ],
       "commands": {
         "nativeSkills": true
       },
@@ -437,9 +440,6 @@
         "565501940742619145": {
           "requireMention": true,
           "ignoreOtherMentions": true,
-          "users": [
-            "476950196589428738"
-          ],
           "channels": {
             "general": {
               "allow": true
@@ -457,9 +457,6 @@
       "defaultAccount": "manager",
       "accounts": {
         "default": {
-          "allowFrom": [
-            "476950196589428738"
-          ],
           "groupPolicy": "allowlist",
           "streaming": "off"
         },

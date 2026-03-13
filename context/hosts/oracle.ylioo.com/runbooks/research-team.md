@@ -1,6 +1,6 @@
 # Oracle Research Team
 
-Last verified: 2026-03-12 UTC
+Last verified: 2026-03-13 UTC
 
 ## Purpose
 This document describes the research team configured on `oracle.ylioo.com` for the Discord server workflow.
@@ -21,6 +21,8 @@ The team is designed for multi-step research and build work where the manager ca
   - `tracker` -> `tracker`
 
 That means the team should stay silent in that guild unless one of the bot members is explicitly mentioned.
+Any member in the routed Discord channel can now use those mentions; Oracle no longer restricts mention-based wakeups to a single allowlisted sender id.
+Discord native slash commands still use a separate owner allowlist and remain limited to the configured operator id.
 
 ## Team members
 - `OpenClaw Manager`
@@ -48,6 +50,8 @@ Rules:
 - Mentioning `OpenClaw Manager` wakes `research-lead`.
 - Mentioning `OpenClaw Engineer`, `OpenClaw Researcher`, `OpenClaw Reporter`, or `OpenClaw Tracker` wakes that specialist directly.
 - Plain text without an explicit bot mention should not trigger a reply in that guild.
+- Any member in the routed channel may use these explicit bot mentions.
+- `/new` and the other native Discord slash commands are separate from mention routing and still require the operator id in `channels.discord.allowFrom`.
 - Operationally, mention one teammate bot per message on the shared channel.
 
 ## Manager delegation policy
@@ -74,6 +78,8 @@ Rules:
 ## Runtime implementation notes
 - Native OpenClaw multi-account Discord routing is now live through `channels.discord.accounts`, `channels.discord.defaultAccount`, and binding-level `match.accountId`.
 - All 5 Discord accounts are bound to the same guild channel, but each account wakes only on its own explicit bot mention because the guild requires mentions.
+- The earlier per-guild sender allowlists were removed from the Oracle Discord config on 2026-03-13 UTC, so mention-based routing is no longer limited to a single operator user id.
+- Oracle still keeps `channels.discord.allowFrom` populated with the operator id because OpenClaw `v2026.3.11` rejects Discord `/...` commands for everyone when neither that owner allowlist nor any per-guild `users` allowlist exists.
 - Oracle build config also sets `ignoreOtherMentions=true` so a Discord role mention or unrelated member mention is dropped instead of falling through to the manager path.
 - All 5 normal team agents now keep the same basic tool baseline:
   - sandboxed `exec`

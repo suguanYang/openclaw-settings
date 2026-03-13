@@ -1,6 +1,6 @@
 # oracle.ylioo.com Runtime
 
-Last verified: 2026-03-12 UTC
+Last verified: 2026-03-13 UTC
 
 ## Current host facts
 - SSH target: `oracle.ylioo.com`
@@ -30,6 +30,8 @@ Last verified: 2026-03-12 UTC
   - `reporter` -> `reporter`
   - `tracker` -> `tracker`
 - `requireMention=true` and `ignoreOtherMentions=true` are enabled for the guild, so the team should stay silent unless one of the bot members is explicitly mentioned.
+- Oracle no longer restricts mention-based wakeups to a single allowlisted user id; any member of the routed guild channel can wake an agent by mentioning the actual bot member.
+- Discord native slash commands are still operator-gated through `channels.discord.allowFrom`, so `/new` and other `/...` commands remain limited to the configured owner id.
 - Confirmed in the live Discord UI on 2026-03-11 that all 5 real bot members are present in `sstar`:
   - `OpenClaw Manager`
   - `OpenClaw Engineer`
@@ -104,6 +106,8 @@ Last verified: 2026-03-12 UTC
 - `research-lead` is configured to auto-delegate substantial tasks to `researcher`, `engineer`, `reporter`, and `tracker` instead of waiting for explicit teammate mentions.
 - Mentioning `OpenClaw Engineer`, `OpenClaw Researcher`, `OpenClaw Reporter`, or `OpenClaw Tracker` routes directly to the matching specialized agent through its own Discord account binding.
 - Plain text without an explicit bot mention should stay silent because `requireMention=true` is enabled.
+- Any member in the routed Discord channel can now use those explicit bot mentions; the old per-guild sender allowlists were removed from the Oracle Discord config on 2026-03-13 UTC.
+- Slash commands use a different authorization path. Oracle now keeps `channels.discord.allowFrom` populated so `/new` remains available to the operator without re-locking mention-based routing.
 - A role mention such as `<@&...>` is not a bot-member mention. On 2026-03-11 the text `@OpenClaw Researcher` resolved to Discord role id `1481135755001724991`, not the researcher bot user id `1481133991749750886`.
 - Oracle build config now sets `ignoreOtherMentions=true` so role mentions and unrelated mentions are ignored instead of being treated as a manager wake-up.
 - The earlier `@manager` / `@engineer` alias-based manager prompt still exists in `workspace-research-lead/AGENTS.md`, but manager-only flows now also allow autonomous internal delegation.
