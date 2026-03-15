@@ -92,11 +92,12 @@ Rules:
 - Verified on 2026-03-12 UTC: Oracle gateway has `0` paired and `0` connected nodes, so `canvas` is exposed but will not render until a node is paired.
 - Oracle now ships the local Knowhere plugin from `~/.openclaw/plugins/knowhere`, trusts it explicitly in `plugins.allow`, and enables `knowhere_*` for sandboxed team agents.
 - `knowhere_get_job_status` lets agents query `GET /v1/jobs/{job_id}` directly, so Tracker can answer job-ID status questions even when no parsed document is currently present in the local store.
-- `plugins.entries.knowhere` now uses `scopeMode=session` with `autoGrounding=false`; same-conversation team bots and their spawned subagents share Knowhere docs through plugin-side scope resolution instead of a host-wide global corpus, but they must invoke `knowhere_*` tools manually.
-- Manual attachment ingests should pass the marker path as `filePath` and the visible attachment label as `fileName`, so later `knowhere_list_documents` output can report the real original filename instead of the temporary saved path.
+- `plugins.entries.knowhere` now uses `scopeMode=session` with `autoGrounding=true`; same-conversation team bots and their spawned subagents still share Knowhere docs through plugin-side scope resolution instead of a host-wide global corpus, and the plugin is configured to auto-ground once Knowhere API access is available.
+- Oracle does set `KNOWHERE_API_KEY`, so attachment auto-ingest and prompt-time grounding have the required API credential on the live host.
+- Manual attachment ingests should still pass the marker path as `filePath` and the visible attachment label as `fileName`, so later `knowhere_list_documents` output can report the real original filename instead of the temporary saved path.
 - Knowhere plugin state is stored separately under `~/.openclaw/plugin-state/knowhere`, so parsed documents do not mix with the plugin package files.
 - The plugin package now defers unsupported file-type errors to the Knowhere API instead of blocking them with local attachment validation.
-- `KNOWHERE_API_KEY` is not configured yet in `.secrets/oracle.ylioo.com.env`, so the plugin loads but Knowhere API-backed ingest operations will fail until credentials are added.
+- `KNOWHERE_API_KEY` is configured in `.secrets/oracle.ylioo.com.env`, so the plugin has the required credential for Knowhere API-backed ingest operations.
 - Sandbox policy now explicitly allows `group:memory`, so `memory_search` and `memory_get` are available again inside sandboxed Codex sessions.
 - Memory search now uses the local provider model `hf:sentence-transformers/all-MiniLM-L6-v2`; the first host warm-up required a user-space `cmake` install under `~/.local/bin`.
 - The sandboxed GitHub CLI path comes from each agent workspace:

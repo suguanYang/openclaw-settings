@@ -70,11 +70,12 @@ Last verified: 2026-03-13 UTC
 - Verified on 2026-03-12 UTC: Oracle gateway has `0` paired and `0` connected nodes, so `canvas` is exposed to team agents but remains unusable until a node is paired.
 - Oracle now ships a managed local plugin payload at `~/.openclaw/plugins/knowhere`, trusts it via `plugins.allow = ["knowhere"]`, and loads it through `plugins.load.paths`.
 - Sandbox policy now also allows `knowhere_*`, so future Knowhere plugin tools inherit the Oracle allowlist without another config edit.
-- `plugins.entries.knowhere` is enabled with `scopeMode=session`, `autoGrounding=false`, and `storageDir=/home/suguan/.openclaw/plugin-state/knowhere`.
-- The tracked Knowhere config stays session-scoped, but usage is now manual: agents decide whether to call `knowhere_*` tools, and the plugin does not auto-ingest attachments or auto-ground prompts.
-- In manual mode, agents should pass attachment marker paths as `filePath` and the visible attachment name as `fileName` when calling `knowhere_ingest_document`, so Knowhere preserves the original filename instead of a temporary UUID path.
+- `plugins.entries.knowhere` is enabled with `scopeMode=session`, `autoGrounding=true`, and `storageDir=/home/suguan/.openclaw/plugin-state/knowhere`.
+- The tracked Knowhere config stays session-scoped and now enables the plugin's auto-grounding hooks. When Knowhere API access is configured, the plugin can auto-ingest supported attachments and inject compact document/status context before prompt construction.
+- Oracle defines `KNOWHERE_API_KEY` in the local secrets file and live `~/.openclaw/.env`, so the configured auto-grounding path has the required API credential on the live host.
+- When manual ingest is still needed, agents should pass attachment marker paths as `filePath` and the visible attachment name as `fileName` when calling `knowhere_ingest_document`, so Knowhere preserves the original filename instead of a temporary UUID path.
 - The local plugin repo `~/github.com/ontosAI/knowhere-openclaw-plugin` now defers attachment format acceptance to the Knowhere API instead of pre-validating file types inside the plugin.
-- `.secrets/oracle.ylioo.com.env` does not currently define `KNOWHERE_API_KEY`, so the plugin can load plus list/search/remove locally stored docs, but new Knowhere ingestion calls will fail until credentials are added.
+- `.secrets/oracle.ylioo.com.env` does define `KNOWHERE_API_KEY`, so the plugin has the required credential for Knowhere API-backed ingest operations.
 - Sandboxed Codex sessions now expose `memory_search` and `memory_get` without reopening host writes.
 - `agents.defaults.memorySearch` is now enabled with the local provider model `hf:sentence-transformers/all-MiniLM-L6-v2`.
 - Oracle needed a user-space `cmake` install at `~/.local/bin/cmake` so the first local `node-llama-cpp` build could complete on arm64.
