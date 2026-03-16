@@ -92,6 +92,7 @@ env_template = env_templates[0]
 rendered_env = out_dir / env_template.relative_to(rootfs_dir)
 
 optional_blank = {"ANTHROPIC_AUTH_TOKEN"}
+ignored_tokens = {"CANCEL", "PURE"}
 token_re = re.compile(r"__([A-Z0-9_]+)__")
 
 
@@ -100,6 +101,8 @@ def render_tokens(text: str) -> str:
 
     def replace(match: re.Match[str]) -> str:
         key = match.group(1)
+        if key in ignored_tokens:
+            return match.group(0)
         if key not in os.environ:
             return match.group(0)
         value = os.environ.get(key)

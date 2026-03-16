@@ -99,7 +99,7 @@ env_template = env_templates[0]
 rendered_env = out_dir / env_template.relative_to(rootfs_dir)
 
 optional_blank = {"ANTHROPIC_AUTH_TOKEN"}
-ignored_tokens = {"PURE"}
+ignored_tokens = {"CANCEL", "PURE"}
 token_re = re.compile(r"__([A-Z0-9_]+)__")
 
 

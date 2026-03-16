@@ -150,6 +150,7 @@
       "model": {
         "primary": "ikuncode-codex/gpt-5.3-codex"
       },
+      "skipBootstrap": true,
       "models": {
         "ikuncode-codex/gpt-5.3-codex": {
           "params": {
@@ -182,7 +183,7 @@
       },
       "sandbox": {
         "mode": "all",
-        "workspaceAccess": "rw",
+        "workspaceAccess": "ro",
         "scope": "agent",
         "browser": {
           "allowHostControl": true
@@ -194,11 +195,14 @@
           "network": "bridge",
           "user": "0:0",
           "env": {
-            "GH_CONFIG_DIR": "/workspace/.openclaw/gh",
+            "GH_CONFIG_DIR": "/tmp/.openclaw/gh",
             "npm_config_nodedir": "/usr"
           },
-          "setupCommand": "(git config --global credential.https://github.com.helper \"!gh auth git-credential\" || true) && (sudo -n true >/dev/null 2>&1 || (printf \"#!/usr/bin/env bash\\nexec \\\"\\$@\\\"\\n\" > /usr/local/bin/sudo && chmod +x /usr/local/bin/sudo))",
-          "binds": []
+          "setupCommand": "mkdir -p /tmp/.openclaw && if [ -d /agent/.openclaw/gh ] && [ ! -e /tmp/.openclaw/gh ]; then cp -a /agent/.openclaw/gh /tmp/.openclaw/gh; fi && (git config --global credential.https://github.com.helper \"!gh auth git-credential\" || true) && (sudo -n true >/dev/null 2>&1 || (printf \"#!/usr/bin/env bash\\nexec \\\"\\$@\\\"\\n\" > /usr/local/bin/sudo && chmod +x /usr/local/bin/sudo))",
+          "binds": [
+            "/home/suguan/.openclaw/plugins/knowhere:/home/suguan/.openclaw/plugins/knowhere:ro"
+          ],
+          "dangerouslyAllowExternalBindSources": true
         }
       }
     },
@@ -207,7 +211,7 @@
         "id": "main",
         "default": true,
         "name": "Main Agent",
-        "workspace": "${OPENCLAW_WORKSPACE_ROOT}",
+        "workspace": "/home/suguan/openclaw-workspace",
         "agentDir": "~/.openclaw/agents/main/agent"
       },
       {
@@ -243,7 +247,7 @@
         "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
-          "workspaceAccess": "rw",
+          "workspaceAccess": "ro",
           "scope": "agent"
         }
       },
@@ -255,7 +259,7 @@
         "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
-          "workspaceAccess": "rw",
+          "workspaceAccess": "ro",
           "scope": "agent"
         }
       },
@@ -267,7 +271,7 @@
         "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
-          "workspaceAccess": "rw",
+          "workspaceAccess": "ro",
           "scope": "agent"
         }
       },
@@ -279,7 +283,7 @@
         "model": "ikuncode-codex/gpt-5.3-codex",
         "sandbox": {
           "mode": "all",
-          "workspaceAccess": "rw",
+          "workspaceAccess": "ro",
           "scope": "agent"
         }
       }
@@ -303,11 +307,11 @@
       "security": "full",
       "ask": "off",
       "pathPrepend": [
-        "/workspace/.openclaw/bin"
+        "/agent/.openclaw/bin"
       ]
     },
     "fs": {
-      "workspaceOnly": true
+      "workspaceOnly": false
     },
     "sandbox": {
       "tools": {
@@ -545,9 +549,7 @@
         "config": {
           "storageDir": "/home/suguan/.openclaw/plugin-state/knowhere",
           "scopeMode": "session",
-          "autoGrounding": true,
-          "maxResults": 4,
-          "minScore": 3
+          "autoGrounding": false
         }
       },
       "open-prose": {

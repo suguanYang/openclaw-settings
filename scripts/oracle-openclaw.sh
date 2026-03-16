@@ -16,6 +16,10 @@ Commands:
   status           Show the current systemd user service status
   restart          Restart the gateway service and print a short status block
   logs [n]         Tail gateway logs with journalctl (default: 120 lines)
+  watch-agent <agent> [--raw] [--tool-result <full|truncate>]
+                   Stream the latest session transcript for one agent
+                   Pretty mode defaults to full toolResult output; truncated mode uses
+                   OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS (default: 100)
   service-file     Print the live openclaw-gateway.service file
   runtime-exec <cmd>
                    Run a remote shell command with the gateway runtime PATH/env bootstrap
@@ -93,6 +97,11 @@ run_logged_remote() {
   return "$status"
 }
 
+run_streamed_remote() {
+  local remote_cmd="$1"
+  ssh "$HOST" "$remote_cmd"
+}
+
 remote_openclaw_body() {
   cat <<'EOFBODY'
 set -euo pipefail
@@ -136,6 +145,16 @@ run_remote_openclaw() {
   run_logged_remote "$action" "bash -lc $(printf '%q' "$remote_script")"
 }
 
+stream_remote_openclaw() {
+  local body="$*"
+  local remote_script
+
+  remote_script="$(remote_openclaw_body)"
+  remote_script+=$'\n'
+  remote_script+="$body"
+  run_streamed_remote "bash -lc $(printf '%q' "$remote_script")"
+}
+
 cmd="${1:-}"
 if [ -z "$cmd" ]; then
   usage
@@ -156,6 +175,188 @@ case "$cmd" in
   logs)
     lines="${1:-120}"
     run_logged_remote "logs" "journalctl --user -u openclaw-gateway.service -n $lines --no-pager"
+    ;;
+  watch-agent)
+    if [ "$#" -eq 0 ]; then
+      echo "watch-agent requires an agent name" >&2
+      exit 1
+    fi
+    agent_name="$1"
+    shift
+    output_mode="pretty"
+    tool_result_mode="full"
+    tool_result_max_chars="${OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS:-100}"
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        --raw)
+          output_mode="raw"
+          shift
+          ;;
+        --tool-result)
+          if [ "$#" -lt 2 ]; then
+            echo "--tool-result requires full or truncate" >&2
+            exit 1
+          fi
+          case "$2" in
+            full|truncate)
+              tool_result_mode="$2"
+              ;;
+            *)
+              echo "--tool-result only accepts full or truncate" >&2
+              exit 1
+              ;;
+          esac
+          shift 2
+          ;;
+        *)
+          echo "watch-agent only accepts --raw and --tool-result <full|truncate>" >&2
+          exit 1
+          ;;
+      esac
+    done
+    remote_watch_script="$(cat <<EOF
+set -euo pipefail
+agent_name=$(printf '%q' "$agent_name")
+output_mode=$(printf '%q' "$output_mode")
+tool_result_mode=$(printf '%q' "$tool_result_mode")
+tool_result_max_chars=$(printf '%q' "$tool_result_max_chars")
+sessions_dir="\$HOME/.openclaw/agents/\$agent_name/sessions"
+history_lines="\${OPENCLAW_WATCH_LINES:-120}"
+
+if [ ! -d "\$sessions_dir" ]; then
+  echo "agent not found or has no sessions directory: \$agent_name" >&2
+  exit 1
+fi
+
+latest_session="\$(find "\$sessions_dir" -maxdepth 1 -type f -name '*.jsonl' -printf '%T@ %p\n' | sort -nr | head -n 1 | cut -d' ' -f2-)"
+if [ -z "\$latest_session" ]; then
+  echo "no session transcripts found for agent: \$agent_name" >&2
+  exit 1
+fi
+
+echo "Watching \$latest_session" >&2
+
+tail_session() {
+  if command -v stdbuf >/dev/null 2>&1; then
+    stdbuf -oL tail -n "\$history_lines" -F "\$latest_session"
+    return 0
+  fi
+  tail -n "\$history_lines" -F "\$latest_session"
+}
+
+if [ "\$output_mode" = "raw" ]; then
+  tail_session
+  exit 0
+fi
+
+if [ ! -x "\$node_bin" ]; then
+  echo "pretty output unavailable because the OpenClaw runtime node binary is missing; falling back to raw JSONL" >&2
+  tail_session
+  exit 0
+fi
+
+tail_session | env \
+  OPENCLAW_WATCH_TOOL_RESULT_MODE="\$tool_result_mode" \
+  OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS="\$tool_result_max_chars" \
+  "\$node_bin" -e '
+const readline = require("node:readline");
+const toolResultMode = process.env.OPENCLAW_WATCH_TOOL_RESULT_MODE || "full";
+const parsedMaxChars = Number.parseInt(process.env.OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS || "100", 10);
+const toolResultMaxChars = Number.isFinite(parsedMaxChars) && parsedMaxChars > 0 ? parsedMaxChars : 100;
+
+function stringifyToolArguments(part) {
+  if (typeof part.partialJson === "string" && part.partialJson.trim()) {
+    return part.partialJson.trim();
+  }
+  if (part.arguments === undefined) {
+    return "";
+  }
+  try {
+    return JSON.stringify(part.arguments);
+  } catch {
+    return "[unserializable arguments]";
+  }
+}
+
+function readEntries(message) {
+  const content = message && Array.isArray(message.content) ? message.content : [];
+  const fallbackRole = typeof message.role === "string" ? message.role : "unknown";
+  const entries = [];
+
+  for (const part of content) {
+    if (!part || typeof part !== "object") {
+      continue;
+    }
+    if (typeof part.text === "string" && part.text) {
+      entries.push({ role: fallbackRole, content: part.text });
+      continue;
+    }
+    if (typeof part.thinking === "string" && part.thinking) {
+      entries.push({ role: fallbackRole, content: part.thinking });
+      continue;
+    }
+    if (part.type === "toolCall") {
+      const toolName = typeof part.name === "string" && part.name ? part.name : "unknown";
+      const args = stringifyToolArguments(part);
+      entries.push({
+        role: "toolCall",
+        content: args ? toolName + " " + args : toolName,
+      });
+    }
+  }
+
+  return entries;
+}
+
+function formatToolResultContent(content) {
+  if (toolResultMode !== "truncate") {
+    return content;
+  }
+  if (content.length <= toolResultMaxChars) {
+    return content;
+  }
+  const truncated = content.slice(0, toolResultMaxChars);
+  return truncated + "\\n[truncated]";
+}
+
+const reader = readline.createInterface({
+  input: process.stdin,
+  crlfDelay: Infinity,
+});
+
+reader.on("line", (line) => {
+  if (!line.trim()) {
+    return;
+  }
+
+  let record;
+  try {
+    record = JSON.parse(line);
+  } catch {
+    process.stdout.write(line + "\\n");
+    return;
+  }
+
+  if (record.type !== "message" || !record.message) {
+    return;
+  }
+
+  const timestamp = typeof record.timestamp === "string" ? record.timestamp : "";
+  const entries = readEntries(record.message);
+  if (entries.length === 0) {
+    return;
+  }
+
+  for (const entry of entries) {
+    const formattedContent =
+      entry.role === "toolResult" ? formatToolResultContent(entry.content) : entry.content;
+    process.stdout.write(timestamp + " [" + entry.role + "] " + formattedContent + "\\n");
+  }
+});
+'
+EOF
+)"
+    stream_remote_openclaw "$remote_watch_script"
     ;;
   service-file)
     run_logged_remote "service-file" "sed -n '1,220p' ~/.config/systemd/user/openclaw-gateway.service"

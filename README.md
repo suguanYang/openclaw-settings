@@ -17,9 +17,6 @@ Local Git repo for managing, auditing, and documenting host-specific OpenClaw de
 ## Information hierarchy
 Read the repo from broad to narrow:
 1. `README.md`: repo purpose, top-level data layers, and common operator flows.
-2. `context/README.md`: documentation hierarchy and storage rules.
-3. `context/architecture/`: repo-wide state model and structural rules.
-4. `context/hosts/<host>/`: host dossiers, runbooks, projects, and repair notes.
 5. `operation-logs/` and `build/`: local intervention evidence plus the path-faithful deploy source.
 
 ## Repo layout
@@ -28,8 +25,6 @@ Read the repo from broad to narrow:
 - `.secrets/`: gitignored secret env files.
 - `references/openclaw/`: gitignored local clone of the upstream OpenClaw source for code reference only.
 - `operation-logs/`: local-only append-only server interaction logs; kept gitignored.
-- `context/architecture/`: repo-wide model and source-of-truth boundary.
-- `context/hosts/`: per-host dossiers with small, focused docs.
 
 ## Fresh-host rebuild
 1. Install Node 22+ on the target host.
@@ -48,9 +43,13 @@ use the bootstrap flow in `bootstrap/oracle.ylioo.com/`, or just run
 - Status: `./scripts/oracle-openclaw.sh status`
 - Restart: `./scripts/oracle-openclaw.sh restart`
 - Logs: `./scripts/oracle-openclaw.sh logs 120`
+- Watch the latest session for one agent: `./scripts/oracle-openclaw.sh watch-agent research-lead`
+- Watch raw JSONL instead of pretty text: `./scripts/oracle-openclaw.sh watch-agent research-lead --raw`
+- Adjust the initial transcript history window: `OPENCLAW_WATCH_LINES=300 ./scripts/oracle-openclaw.sh watch-agent research-lead`
 - Health: `./scripts/oracle-openclaw.sh health`
 - Snapshot: `./scripts/oracle-openclaw.sh snapshot`
 - Update: `./scripts/oracle-openclaw.sh update`
+- Knowhere plugin deploy: `./scripts/deploy-knowhere-plugin.sh`
 - Discord multi-account cutover helper: `./scripts/oracle-discord-cutover.sh`
 
 ## Redaction and secrets
@@ -60,9 +59,6 @@ use the bootstrap flow in `bootstrap/oracle.ylioo.com/`, or just run
 - `operation-logs/` is local-only and must not be pushed.
 - Local plugin payloads under `build/**/.openclaw/plugins/` must stay gitignored.
 
-## State model
-The rebuild boundary is documented in `context/architecture/source-of-truth.md`.
-
 ## Build trees
 - `build/` is the host-path-oriented deploy source.
 - It mirrors files into exact host-style paths under `build/<host>/rootfs/`.
@@ -71,10 +67,4 @@ The rebuild boundary is documented in `context/architecture/source-of-truth.md`.
 - `./scripts/oracle-openclaw.sh snapshot` now captures a redacted live tree into `.tmp/live/<host>/` for comparison only.
 
 ## Documentation update rules
-- Live host behavior changed: update local `operation-logs/` plus the smallest relevant file under `context/hosts/<host>/`.
-- Repo-wide policy or storage rules changed: update `context/architecture/`.
 - Fresh-host setup flow changed: update `bootstrap/README.md` plus the smallest relevant file under `bootstrap/`.
-
-## Current coverage
-- As of 2026-03-11 UTC, `build/oracle.ylioo.com/rootfs/` + local `.secrets/oracle.ylioo.com.env` are sufficient to recreate the intended Oracle OpenClaw deployment without reading the live host config by hand.
-- Runtime-only host state is no longer tracked in the deploy tree; use `.tmp/live/oracle.ylioo.com/` when you need a redacted live capture for comparison.
