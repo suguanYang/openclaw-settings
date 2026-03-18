@@ -92,12 +92,15 @@ Allowed sandbox tool families include:
 
 - file edit/write/apply tools
 - exec/process/session tools
+- `cron` automation
+- direct Discord connector access
 - browser/canvas/image tools
 - memory tools
 - `knowhere_*` tools
 
-Denied sandbox tool families include direct chat/channel connectors such as
-Discord, Slack, Telegram, WhatsApp, Signal, and related channel integrations.
+Denied sandbox tool families still include `gateway` plus the remaining direct
+chat/channel connectors such as Slack, Telegram, WhatsApp, Signal, and related
+channel integrations.
 
 ## Discord routing model
 
