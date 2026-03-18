@@ -40,18 +40,19 @@ For a reproducible clone of the current Oracle deployment on a different host,
 start from `build/oracle.ylioo.com/`, copy it into a host-specific build
 directory, and use the same render/apply flow above.
 
-## Oracle helper flow
-- Status: `./scripts/oracle-openclaw.sh status`
-- Restart: `./scripts/oracle-openclaw.sh restart`
-- Logs: `./scripts/oracle-openclaw.sh logs 120`
-- Watch the latest session for one agent with all transcript record types: `./scripts/oracle-openclaw.sh watch-agent research-lead`
-- Watch raw JSONL instead of pretty text: `./scripts/oracle-openclaw.sh watch-agent research-lead --raw`
-- Adjust the initial transcript history window: `OPENCLAW_WATCH_LINES=300 ./scripts/oracle-openclaw.sh watch-agent research-lead`
-- Health: `./scripts/oracle-openclaw.sh health`
-- Snapshot: `./scripts/oracle-openclaw.sh snapshot`
-- Update: `./scripts/oracle-openclaw.sh update`
-- Knowhere plugin deploy: `./scripts/deploy-knowhere-plugin.sh`
+## Host helper flow
+- Status: `./scripts/openclaw-host.sh --host <ssh-host> status`
+- Restart: `./scripts/openclaw-host.sh --host <ssh-host> restart`
+- Logs: `./scripts/openclaw-host.sh --host <ssh-host> logs 120`
+- Watch the latest session for one agent with all transcript record types: `./scripts/openclaw-host.sh --host <ssh-host> watch-agent research-lead`
+- Watch raw JSONL instead of pretty text: `./scripts/openclaw-host.sh --host <ssh-host> watch-agent research-lead --raw`
+- Adjust the initial transcript history window: `OPENCLAW_WATCH_LINES=300 ./scripts/openclaw-host.sh --host <ssh-host> watch-agent research-lead`
+- Health: `./scripts/openclaw-host.sh --host <ssh-host> health`
+- Snapshot: `./scripts/openclaw-host.sh --host <ssh-host> snapshot`
+- Update: `./scripts/openclaw-host.sh --host <ssh-host> update`
+- Knowhere plugin deploy: `./scripts/deploy-knowhere-plugin.sh --host <ssh-host>`
 - Discord multi-account cutover helper: `./scripts/oracle-discord-cutover.sh`
+- Oracle shortcut: `./scripts/oracle-openclaw.sh ...` still targets `oracle.ylioo.com` by default.
 
 ## Redaction and secrets
 - Never commit plaintext secrets.
@@ -65,7 +66,7 @@ directory, and use the same render/apply flow above.
 - It mirrors files into exact host-style paths under `build/<host>/rootfs/`.
 - Edit `build/` directly when changing intended host state.
 - Render and apply it with `./scripts/render-build-state.sh` and `./scripts/apply-build-host.sh`.
-- `./scripts/oracle-openclaw.sh snapshot` now captures a redacted live tree into `.tmp/live/<host>/` for comparison only.
+- `./scripts/openclaw-host.sh --host <ssh-host> snapshot` captures a redacted live tree into `.tmp/live/<host>/` for comparison only.
 
 ## Documentation update rules
 - Fresh-host setup flow changed: update `README.md` plus the smallest relevant file under `build/` or `scripts/`.

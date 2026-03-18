@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-HOST="oracle.ylioo.com"
+HOST="${OPENCLAW_HOST:-oracle.ylioo.com}"
 PLUGIN_DIR="/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin"
-BUILD_DIR="$ROOT/build/$HOST"
+BUILD_DIR=""
 REMOTE_PLUGIN_DIR="/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin"
 LOG_DIR="$ROOT/operation-logs"
 STAGE_ONLY=0
@@ -23,8 +23,8 @@ usage() {
   cat <<'USAGE'
 Usage: ./scripts/deploy-knowhere-plugin.sh [options]
 
-Sync the local Knowhere plugin payload into the Oracle build tree, upload the
-same payload to the live host, restart OpenClaw, and verify the deployed hash.
+Sync the local Knowhere plugin payload into the selected build tree, upload the
+same payload to the target host, restart OpenClaw, and verify the deployed hash.
 
 Options:
   --host <ssh-host>                 SSH host to deploy to (default: oracle.ylioo.com)
@@ -47,7 +47,7 @@ ensure_log_file() {
   mkdir -p "$LOG_DIR"
   if [ ! -f "$LOG_FILE" ]; then
     {
-      printf '# Oracle OpenClaw Operation Log\n\n'
+      printf '# OpenClaw Host Operation Log\n\n'
       printf -- '- Host: `%s`\n' "$HOST"
       printf -- '- Date (UTC): `%s`\n' "$(date -u +%F)"
       printf -- '- Recorder: `scripts/deploy-knowhere-plugin.sh`\n'
@@ -241,6 +241,10 @@ done
 
 ensure_log_file
 
+if [ -z "$BUILD_DIR" ]; then
+  BUILD_DIR="$ROOT/build/$HOST"
+fi
+
 if [ ! -d "$PLUGIN_DIR" ]; then
   echo "missing plugin directory: $PLUGIN_DIR" >&2
   exit 1
@@ -338,11 +342,11 @@ if [ "$SKIP_RESTART" -eq 1 ]; then
   exit 0
 fi
 
-"$ROOT/scripts/oracle-openclaw.sh" restart
+"$ROOT/scripts/openclaw-host.sh" --host "$HOST" restart
 
 if [ "$SKIP_HEALTH" -eq 1 ]; then
   echo "Skipped post-restart health check."
   exit 0
 fi
 
-"$ROOT/scripts/oracle-openclaw.sh" health
+"$ROOT/scripts/openclaw-host.sh" --host "$HOST" health

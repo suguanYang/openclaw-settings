@@ -5,6 +5,7 @@ shopt -s nullglob
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$ROOT/.tmp/snapshot.$$"
 SRC_STAGE="$TMP/src"
+SNAPSHOT_OPENCLAW_HOME="${OPENCLAW_SNAPSHOT_OPENCLAW_HOME:-}"
 
 # Optional: set OPENCLAW_SNAPSHOT_HOST to capture from a remote host over SSH.
 HOST="${OPENCLAW_SNAPSHOT_HOST:-}"
@@ -65,7 +66,7 @@ collect_openclaw_tree_local() {
 }
 
 collect_local() {
-  local base="${OPENCLAW_HOME:-$HOME/.openclaw}"
+  local base="${SNAPSHOT_OPENCLAW_HOME:-${OPENCLAW_HOME:-$HOME/.openclaw}}"
 
   collect_openclaw_tree_local "$base"
   copy_local_file "$HOME/.acpx/config.json"
@@ -77,7 +78,13 @@ collect_local() {
 
 collect_remote() {
   local host="$1"
-  ssh "$host" 'bash -s' <<'REMOTE' | tar -xf - -C "$SRC_STAGE"
+  local remote_cmd="bash -s"
+
+  if [ -n "$SNAPSHOT_OPENCLAW_HOME" ]; then
+    remote_cmd="OPENCLAW_HOME=$(printf '%q' "$SNAPSHOT_OPENCLAW_HOME") bash -s"
+  fi
+
+  ssh "$host" "$remote_cmd" <<'REMOTE' | tar -xf - -C "$SRC_STAGE"
 set -euo pipefail
 shopt -s nullglob
 
