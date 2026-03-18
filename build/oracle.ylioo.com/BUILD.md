@@ -3,16 +3,15 @@
 This file documents the role of `build/oracle.ylioo.com/` as a path-faithful
 deploy tree.
 
-It is no longer the main setup guide for cloning Oracle onto another host.
-Use `../../bootstrap/oracle.ylioo.com/README.md` or `./bootstrap/setup.sh` for
-the actual bootstrap workflow.
+This directory is the tracked input for rendering and applying Oracle build
+state with the repo-supported scripts.
 
 ## What This Directory Is For
 
 - Keep the exact tracked host-style files under `rootfs/`.
 - Show which Oracle files are declarative build state versus runtime state.
-- Give operators one place to inspect or edit the files that bootstrap will
-  render and upload.
+- Give operators one place to inspect or edit the files that the render/apply
+  flow will stage and upload.
 
 Typical tracked files here:
 
@@ -43,19 +42,24 @@ not live operational residue.
 
 ## How This Tree Is Used
 
-The bootstrap flow reads this tree, merges in local secrets, renders the staged
-output, and then uploads it to the target host.
+`scripts/render-build-state.sh` reads this tree, merges in local secrets, and
+renders the staged output. `scripts/apply-build-host.sh` calls the renderer,
+uploads the result to the target host, and repairs the live installation.
 
 If you want to inspect the rendered result without applying it:
 
 ```sh
-./bootstrap/setup.sh --profile oracle.ylioo.com --render-only
+./scripts/render-build-state.sh \
+  --build-dir build/oracle.ylioo.com \
+  --secrets-file .secrets/oracle.ylioo.com.env
 ```
 
-If you want the full guided setup flow:
+If you want to apply the tracked Oracle state:
 
 ```sh
-./bootstrap/setup.sh
+./scripts/apply-build-host.sh \
+  --host oracle.ylioo.com \
+  --secrets-file .secrets/oracle.ylioo.com.env
 ```
 
 ## When To Edit This Directory
@@ -72,6 +76,6 @@ Examples:
 After changing the intended state:
 
 1. Keep `build/` aligned with what you intend to deploy.
-2. Use the bootstrap flow to render or apply it.
+2. Use the render/apply scripts to stage or deploy it.
 3. Record real server interventions in `operation-logs/`.
 4. Update the relevant host docs if behavior changed.

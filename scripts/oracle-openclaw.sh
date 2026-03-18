@@ -22,7 +22,7 @@ Commands:
                    OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS (default: 100)
   service-file     Print the live openclaw-gateway.service file
   runtime-exec <cmd>
-                   Run a remote shell command with the gateway runtime PATH/env bootstrap
+                   Run a remote shell command with the gateway runtime PATH/env setup
   doctor           Run OpenClaw doctor using the service's current Node + entrypoint
   health           Run OpenClaw health using the service's current Node + entrypoint
   update           Update the global pnpm install, repair the service, then restart + health

@@ -21,7 +21,6 @@ Read the repo from broad to narrow:
 
 ## Repo layout
 - `build/`: path-faithful host build trees plus reference notes for the tracked files.
-- `bootstrap/`: fresh-host rebuild flows kept separate from the current Oracle maintenance scripts.
 - `.secrets/`: gitignored secret env files.
 - `references/openclaw/`: gitignored local clone of the upstream OpenClaw source for code reference only.
 - `operation-logs/`: local-only append-only server interaction logs; kept gitignored.
@@ -30,14 +29,16 @@ Read the repo from broad to narrow:
 1. Install Node 22+ on the target host.
 2. Copy `build/<host>/secrets.example.env` to `.secrets/<host>.env` and fill the secrets locally.
 3. Review and edit `build/<host>/rootfs/` until it matches the desired host state.
-4. Apply the build tree to the server:
+4. Optionally render the staged build tree locally:
+   `./scripts/render-build-state.sh --build-dir build/<host> --secrets-file .secrets/<host>.env`
+5. Apply the build tree to the server:
    `./scripts/apply-build-host.sh --host <ssh-host> --secrets-file .secrets/<host>.env`
-5. Optionally capture the live host into `.tmp/live/<host>/` for comparison:
+6. Optionally capture the live host into `.tmp/live/<host>/` for comparison:
    `OPENCLAW_SNAPSHOT_HOST=<ssh-host> ./scripts/snapshot.sh`
 
 For a reproducible clone of the current Oracle deployment on a different host,
-use the bootstrap flow in `bootstrap/oracle.ylioo.com/`, or just run
-`./bootstrap/setup.sh`.
+start from `build/oracle.ylioo.com/`, copy it into a host-specific build
+directory, and use the same render/apply flow above.
 
 ## Oracle helper flow
 - Status: `./scripts/oracle-openclaw.sh status`
@@ -67,4 +68,4 @@ use the bootstrap flow in `bootstrap/oracle.ylioo.com/`, or just run
 - `./scripts/oracle-openclaw.sh snapshot` now captures a redacted live tree into `.tmp/live/<host>/` for comparison only.
 
 ## Documentation update rules
-- Fresh-host setup flow changed: update `bootstrap/README.md` plus the smallest relevant file under `bootstrap/`.
+- Fresh-host setup flow changed: update `README.md` plus the smallest relevant file under `build/` or `scripts/`.
