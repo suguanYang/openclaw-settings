@@ -1,0 +1,13 @@
+[Unit]
+Description=Poll Logfire exceptions and hand off alerts to OpenClaw tracker
+Wants=openclaw-gateway.service
+After=openclaw-gateway.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=%h/.openclaw/.env
+Environment=PATH=%h/.pyenv/shims:%h/.local/bin:%h/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/.local/bin/logfire-alert-poller.py
+WorkingDirectory=%h
+TimeoutStartSec=180
+

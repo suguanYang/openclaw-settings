@@ -149,6 +149,38 @@ This means the tracked design keeps the OpenClaw gateway local on the host and
 expects remote access to come through the Tailscale-served surface instead of a
 public bind.
 
+## Logfire exception polling
+
+- Oracle also carries a user-level timer pair for Logfire exception polling:
+  - `logfire-alert-poller.service`
+  - `logfire-alert-poller.timer`
+- The poller runs locally on the host every 5 minutes, queries Logfire through
+  the official hosted MCP endpoint, deduplicates exception groups in local
+  state, and hands any new or reopened groups to the `tracker` agent.
+- The poller now shells out to a tiny local Node helper that uses the official
+  `@modelcontextprotocol/sdk` package instead of a handwritten transport
+  client. The pinned helper bundle lives under
+  `rootfs/home/suguan/.local/share/logfire-alert-poller/` and is installed
+  during apply.
+- The current tracked query narrows to production records where either
+  `is_exception = true` or `level = 'error'`, and it does not pin
+  `service_name`.
+- Delivery stays inside OpenClaw: the poller invokes `openclaw agent` with
+  explicit Discord reply overrides so the final message is posted by the
+  `tracker` Discord account into the tracked main channel.
+- Runtime state for dedupe is stored under
+  `~/.openclaw/integrations/logfire-alerts/state.json`.
+- The tracked env contract adds:
+  - `LOGFIRE_READ_TOKEN` (secret)
+  - `LOGFIRE_MCP_TRANSPORT`
+  - `LOGFIRE_MCP_ENDPOINT`
+  - `LOGFIRE_MCP_HTTP_TIMEOUT_SECONDS`
+  - `LOGFIRE_MCP_COMMAND` as a stdio fallback
+  - `LOGFIRE_ALERT_*` tuning variables for service/env/level filters,
+    lookback, suppression, and delivery target
+
+This design avoids any public webhook ingress for Logfire alerts.
+
 ## Plugins and custom extensions
 
 Three plugin entries are enabled:

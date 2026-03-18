@@ -238,13 +238,25 @@ if [ -z "$openclaw_bin" ]; then
   exit 1
 fi
 
+poller_helper_root="$HOME/.local/share/logfire-alert-poller"
+if [ -f "$poller_helper_root/package.json" ]; then
+  pnpm install --prod --dir "$poller_helper_root" --frozen-lockfile
+fi
+
 "$openclaw_bin" gateway install --runtime node --force
 "$openclaw_bin" doctor --repair
 systemctl --user daemon-reload
 systemctl --user restart openclaw-gateway.service
+if [ -f "$HOME/.config/systemd/user/logfire-alert-poller.timer" ]; then
+  systemctl --user enable --now logfire-alert-poller.timer
+  systemctl --user restart logfire-alert-poller.timer
+fi
 sleep 5
 "$openclaw_bin" health
 systemctl --user status openclaw-gateway.service --no-pager | sed -n '1,120p'
+if [ -f "$HOME/.config/systemd/user/logfire-alert-poller.timer" ]; then
+  systemctl --user status logfire-alert-poller.timer --no-pager | sed -n '1,80p'
+fi
 REMOTE
 )
 
