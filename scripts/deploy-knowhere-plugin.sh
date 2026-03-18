@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOST="oracle.ylioo.com"
 PLUGIN_DIR="/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin"
 BUILD_DIR="$ROOT/build/$HOST"
-REMOTE_PLUGIN_DIR="/home/suguan/.openclaw/plugins/knowhere"
+REMOTE_PLUGIN_DIR="/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin"
 LOG_DIR="$ROOT/operation-logs"
 STAGE_ONLY=0
 SKIP_RESTART=0
@@ -260,7 +260,7 @@ for item in "${PAYLOAD_ITEMS[@]}"; do
   verify_payload_item_exists "$item"
 done
 
-BUILD_PLUGIN_DIR="$BUILD_DIR/rootfs/home/suguan/.openclaw/plugins/knowhere"
+BUILD_PLUGIN_DIR="$BUILD_DIR/rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin"
 TEMP_DIR="$(mktemp -d)"
 PAYLOAD_DIR="$TEMP_DIR/payload"
 trap 'rm -rf "$TEMP_DIR"' EXIT

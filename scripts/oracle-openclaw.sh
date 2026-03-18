@@ -18,7 +18,7 @@ Commands:
   logs [n]         Tail gateway logs with journalctl (default: 120 lines)
   watch-agent <agent> [--raw] [--tool-result <full|truncate>]
                    Stream the latest session transcript for one agent
-                   Pretty mode defaults to full toolResult output; truncated mode uses
+                   Pretty mode prints all transcript record types; truncated mode uses
                    OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS (default: 100)
   service-file     Print the live openclaw-gateway.service file
   runtime-exec <cmd>
@@ -263,6 +263,7 @@ const readline = require("node:readline");
 const toolResultMode = process.env.OPENCLAW_WATCH_TOOL_RESULT_MODE || "full";
 const parsedMaxChars = Number.parseInt(process.env.OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS || "100", 10);
 const toolResultMaxChars = Number.isFinite(parsedMaxChars) && parsedMaxChars > 0 ? parsedMaxChars : 100;
+const emptyObjectJson = "{}";
 
 function stringifyToolArguments(part) {
   if (typeof part.partialJson === "string" && part.partialJson.trim()) {
@@ -278,12 +279,86 @@ function stringifyToolArguments(part) {
   }
 }
 
-function readEntries(message) {
-  const content = message && Array.isArray(message.content) ? message.content : [];
+function safeJson(value) {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return "[unserializable]";
+  }
+}
+
+function omitKeys(value, keys) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return value;
+  }
+
+  const filtered = {};
+  for (const [key, entryValue] of Object.entries(value)) {
+    if (keys.has(key) || entryValue === undefined) {
+      continue;
+    }
+    filtered[key] = entryValue;
+  }
+  return filtered;
+}
+
+function formatMetadata(value) {
+  if (value === undefined) {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+
+  const json = safeJson(value);
+  return json === emptyObjectJson ? "" : json;
+}
+
+function joinSegments(segments) {
+  return segments.filter(Boolean).join(" ");
+}
+
+function formatRecordLabel(type, suffix) {
+  if (!suffix) {
+    return type;
+  }
+  return type + ":" + suffix;
+}
+
+function formatContentPart(part) {
+  const type = typeof part.type === "string" && part.type ? part.type : "part";
+  if (typeof part.data === "string" && part.data) {
+    const binarySummary = joinSegments([
+      typeof part.mimeType === "string" && part.mimeType ? "mimeType=" + part.mimeType : "",
+      "dataChars=" + String(part.data.length),
+      formatMetadata(omitKeys(part, new Set(["type", "data", "mimeType"]))),
+    ]);
+    return "[" + type + "] " + binarySummary;
+  }
+
+  const payload = formatMetadata(omitKeys(part, new Set(["type"])));
+  if (!payload) {
+    return "[" + type + "]";
+  }
+  return "[" + type + "] " + payload;
+}
+
+function readMessageEntries(message) {
   const fallbackRole = typeof message.role === "string" ? message.role : "unknown";
+  if (typeof message.content === "string") {
+    return message.content ? [{ role: fallbackRole, content: message.content }] : [];
+  }
+
+  const content = Array.isArray(message.content) ? message.content : [];
   const entries = [];
 
   for (const part of content) {
+    if (typeof part === "string") {
+      if (part) {
+        entries.push({ role: fallbackRole, content: part });
+      }
+      continue;
+    }
     if (!part || typeof part !== "object") {
       continue;
     }
@@ -302,10 +377,106 @@ function readEntries(message) {
         role: "toolCall",
         content: args ? toolName + " " + args : toolName,
       });
+      continue;
     }
+
+    entries.push({ role: fallbackRole, content: formatContentPart(part) });
   }
 
   return entries;
+}
+
+function readRecordEntries(record) {
+  if (record.message && typeof record.message === "object") {
+    const messageEntries = readMessageEntries(record.message);
+    if (messageEntries.length > 0) {
+      return messageEntries;
+    }
+
+    const messageRole =
+      record.message && typeof record.message.role === "string" ? record.message.role : "message";
+    const messageMetadata = formatMetadata(
+      omitKeys(record.message, new Set(["role", "content"])),
+    );
+    if (messageMetadata) {
+      return [{ role: messageRole, content: messageMetadata }];
+    }
+  }
+
+  const recordType = typeof record.type === "string" && record.type ? record.type : "record";
+
+  if (recordType === "session") {
+    const sessionSummary = joinSegments([
+      typeof record.id === "string" && record.id ? "id=" + record.id : "",
+      typeof record.cwd === "string" && record.cwd ? "cwd=" + record.cwd : "",
+      typeof record.parentSession === "string" && record.parentSession
+        ? "parentSession=" + record.parentSession
+        : "",
+      formatMetadata(omitKeys(record, new Set(["type", "id", "cwd", "parentSession", "timestamp"]))),
+    ]);
+    return [{ role: "session", content: sessionSummary || safeJson(record) }];
+  }
+
+  if (recordType === "custom_message") {
+    const customMessageContent =
+      typeof record.content === "string" && record.content
+        ? record.content
+        : formatMetadata(record.content);
+    const customMessageSummary = joinSegments([
+      customMessageContent,
+      formatMetadata(omitKeys(record, new Set(["type", "customType", "content", "timestamp"]))),
+    ]);
+    return [
+      {
+        role: formatRecordLabel(
+          "custom_message",
+          typeof record.customType === "string" && record.customType ? record.customType : "",
+        ),
+        content: customMessageSummary || safeJson(record),
+      },
+    ];
+  }
+
+  if (recordType === "custom") {
+    const customSummary = joinSegments([
+      formatMetadata(record.data),
+      formatMetadata(omitKeys(record, new Set(["type", "customType", "data", "timestamp"]))),
+    ]);
+    return [
+      {
+        role: formatRecordLabel(
+          "custom",
+          typeof record.customType === "string" && record.customType ? record.customType : "",
+        ),
+        content: customSummary || safeJson(record),
+      },
+    ];
+  }
+
+  if (recordType === "compaction") {
+    const compactionSummary = joinSegments([
+      typeof record.summary === "string" && record.summary ? record.summary : "",
+      typeof record.tokensBefore === "number" ? "tokensBefore=" + String(record.tokensBefore) : "",
+      typeof record.firstKeptEntryId === "string" && record.firstKeptEntryId
+        ? "firstKeptEntryId=" + record.firstKeptEntryId
+        : "",
+      formatMetadata(
+        omitKeys(record, new Set(["type", "summary", "tokensBefore", "firstKeptEntryId", "timestamp"])),
+      ),
+    ]);
+    return [{ role: "compaction", content: compactionSummary || safeJson(record) }];
+  }
+
+  if (recordType === "branch_summary") {
+    const branchSummary = joinSegments([
+      typeof record.summary === "string" && record.summary ? record.summary : "",
+      formatMetadata(omitKeys(record, new Set(["type", "summary", "timestamp"]))),
+    ]);
+    return [{ role: "branch_summary", content: branchSummary || safeJson(record) }];
+  }
+
+  const recordSummary = formatMetadata(omitKeys(record, new Set(["type", "timestamp"])));
+  return [{ role: recordType, content: recordSummary || safeJson(record) }];
 }
 
 function formatToolResultContent(content) {
@@ -337,12 +508,13 @@ reader.on("line", (line) => {
     return;
   }
 
-  if (record.type !== "message" || !record.message) {
-    return;
-  }
-
-  const timestamp = typeof record.timestamp === "string" ? record.timestamp : "";
-  const entries = readEntries(record.message);
+  const timestamp =
+    typeof record.timestamp === "string"
+      ? record.timestamp
+      : Number.isFinite(record.timestamp)
+        ? new Date(record.timestamp).toISOString()
+        : "";
+  const entries = readRecordEntries(record);
   if (entries.length === 0) {
     return;
   }
@@ -350,7 +522,8 @@ reader.on("line", (line) => {
   for (const entry of entries) {
     const formattedContent =
       entry.role === "toolResult" ? formatToolResultContent(entry.content) : entry.content;
-    process.stdout.write(timestamp + " [" + entry.role + "] " + formattedContent + "\\n");
+    const prefix = timestamp ? timestamp + " " : "";
+    process.stdout.write(prefix + "[" + entry.role + "] " + formattedContent + "\\n");
   }
 });
 '

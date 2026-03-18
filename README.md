@@ -43,7 +43,7 @@ use the bootstrap flow in `bootstrap/oracle.ylioo.com/`, or just run
 - Status: `./scripts/oracle-openclaw.sh status`
 - Restart: `./scripts/oracle-openclaw.sh restart`
 - Logs: `./scripts/oracle-openclaw.sh logs 120`
-- Watch the latest session for one agent: `./scripts/oracle-openclaw.sh watch-agent research-lead`
+- Watch the latest session for one agent with all transcript record types: `./scripts/oracle-openclaw.sh watch-agent research-lead`
 - Watch raw JSONL instead of pretty text: `./scripts/oracle-openclaw.sh watch-agent research-lead --raw`
 - Adjust the initial transcript history window: `OPENCLAW_WATCH_LINES=300 ./scripts/oracle-openclaw.sh watch-agent research-lead`
 - Health: `./scripts/oracle-openclaw.sh health`
@@ -57,7 +57,7 @@ use the bootstrap flow in `bootstrap/oracle.ylioo.com/`, or just run
 - `build/` is tracked; `.secrets/` is local only.
 - `build/` and `operation-logs/` must contain only redacted or placeholder-safe values.
 - `operation-logs/` is local-only and must not be pushed.
-- Local plugin payloads under `build/**/.openclaw/plugins/` must stay gitignored.
+- Local Knowhere plugin payloads staged under `build/**/rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin/` must stay gitignored.
 
 ## Build trees
 - `build/` is the host-path-oriented deploy source.

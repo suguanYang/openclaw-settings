@@ -10,6 +10,7 @@
 /operation-logs/
 /snapshots/
 /build/**/.openclaw/plugins/
+/build/**/rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin/
 /build/**/*.bak*
 
 # If you ever place raw exports here, keep them out of git
