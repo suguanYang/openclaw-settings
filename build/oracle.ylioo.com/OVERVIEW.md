@@ -191,16 +191,21 @@ Three plugin entries are enabled:
 
 Important details:
 
-- The only explicitly allowed external plugin is `knowhere-claw`.
+- The explicitly allowed external plugins are `acpx` and `knowhere-claw`.
 - OpenClaw loads plugins from
   `/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin`.
 - `acpx` is configured with:
   - `cwd = /home/suguan/openclaw-workspace`
   - `permissionMode = approve-all`
   - `nonInteractivePermissions = fail`
+  - `mcpServers.logfire = uvx logfire-mcp@latest` with `LOGFIRE_READ_TOKEN`
 - `knowhere-claw` stores data under
   `/home/suguan/.openclaw/plugin-state/knowhere`
   with `scopeMode = session`.
+
+ACP sessions spawned through `acpx` now receive the Logfire MCP server during
+session bootstrap, so channel or thread ACP runs can query production Logfire
+data without the native OpenClaw agents carrying a separate handwritten client.
 
 The build tree also carries a staged packaged copy under
 `rootfs/home/suguan/.openclaw/plugins/knowhere/` and a source checkout under

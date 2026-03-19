@@ -599,6 +599,7 @@ def build_tracker_message(groups: list[AlertGroup], settings: Settings) -> str:
 
 def send_tracker_alert(message: str, settings: Settings) -> None:
     openclaw_bin = resolve_openclaw_bin()
+    command_env = build_openclaw_command_env()
     command = [
         openclaw_bin,
         "agent",
@@ -621,6 +622,7 @@ def send_tracker_alert(message: str, settings: Settings) -> None:
         capture_output=True,
         text=True,
         check=False,
+        env=command_env,
         timeout=settings.openclaw_timeout_seconds + 30,
     )
     if completed.returncode != 0:
@@ -750,6 +752,18 @@ def resolve_openclaw_bin() -> str:
         if path.is_file() and os.access(path, os.X_OK):
             return str(path)
     raise PollerError("openclaw binary not found; set OPENCLAW_BIN or add it to PATH")
+
+
+def build_openclaw_command_env() -> dict[str, str]:
+    node_bin = resolve_node_bin()
+    env = dict(os.environ)
+    existing_path = env.get("PATH", "")
+    node_dir = str(Path(node_bin).parent)
+    if existing_path:
+        env["PATH"] = f"{node_dir}:{existing_path}"
+    else:
+        env["PATH"] = node_dir
+    return env
 
 
 def read_gateway_node_bin() -> str:

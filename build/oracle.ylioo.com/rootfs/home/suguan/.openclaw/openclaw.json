@@ -558,6 +558,7 @@
   },
   "plugins": {
     "allow": [
+      "acpx",
       "knowhere-claw"
     ],
     "load": {
@@ -571,7 +572,18 @@
         "config": {
           "cwd": "/home/suguan/openclaw-workspace",
           "permissionMode": "approve-all",
-          "nonInteractivePermissions": "fail"
+          "nonInteractivePermissions": "fail",
+          "mcpServers": {
+            "logfire": {
+              "command": "uvx",
+              "args": [
+                "logfire-mcp@latest"
+              ],
+              "env": {
+                "LOGFIRE_READ_TOKEN": "${LOGFIRE_READ_TOKEN}"
+              }
+            }
+          }
         }
       },
       "knowhere-claw": {
