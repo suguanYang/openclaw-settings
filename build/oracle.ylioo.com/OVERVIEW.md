@@ -15,6 +15,8 @@ during render/apply.
   `~/.openclaw/tools/playwright-browsers/...`.
 - Logging is configured for high visibility: `trace` level overall, `debug`
   console level, and pretty console output.
+- Host journald retention is capped at `1G` for both persistent and runtime
+  journal storage through `/etc/systemd/journald.conf.d/50-openclaw-journal-size.conf`.
 - The main shared workspace root is `/home/suguan/openclaw-workspace`.
 
 Tracked sources:
@@ -266,6 +268,7 @@ The main tracked files behind this overview are:
 - `rootfs/home/suguan/.local/bin/openclaw-codex-acp`
 - `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
+- `rootfs/etc/systemd/journald.conf.d/50-openclaw-journal-size.conf`
 - `rootfs/home/suguan/.openclaw/workspace*/`
 - `rootfs/home/suguan/.openclaw/plugins/knowhere/`
 - `rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin/`

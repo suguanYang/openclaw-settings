@@ -24,6 +24,7 @@ Typical tracked files here:
 - `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
 - `rootfs/home/suguan/.openclaw/workspace*/`
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
+- `rootfs/etc/systemd/journald.conf.d/50-openclaw-journal-size.conf`
 
 ## What This Directory Does Not Contain
 
@@ -48,6 +49,11 @@ not live operational residue.
 `scripts/render-build-state.sh` reads this tree, merges in local secrets, and
 renders the staged output. `scripts/apply-build-host.sh` calls the renderer,
 uploads the result to the target host, and repairs the live installation.
+
+Tracked root-owned files under `rootfs/etc/` are still part of desired Oracle
+state, but they are not installed by `scripts/apply-build-host.sh` because
+that flow uploads as the `suguan` user. Use a dedicated helper or a manual
+interactive `sudo` step on the host when those files change.
 
 If you want to inspect the rendered result without applying it:
 
