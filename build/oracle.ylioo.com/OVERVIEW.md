@@ -220,8 +220,17 @@ Three plugin entries are enabled:
 Important details:
 
 - The explicitly allowed external plugins are `acpx` and `knowhere-claw`.
-- OpenClaw loads plugins from
-  `/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin`.
+- `knowhere-claw` is treated as the external npm plugin
+  `@ontos-ai/knowhere-claw`, not a local source checkout.
+- Operators should install it with
+  `openclaw plugins install @ontos-ai/knowhere-claw --pin` and update it with
+  `openclaw plugins update knowhere-claw`.
+- OpenClaw installs npm plugins under `~/.openclaw/extensions/<id>/`; this
+  repo tracks the desired config entry for `knowhere-claw`, not a vendored
+  plugin copy.
+- `plugins.installs` is CLI-managed host runtime state used by
+  `openclaw plugins update`, so it is not hand-edited or mirrored under
+  `build/`.
 - `acpx` is configured with:
   - `command = acpx`
   - `expectedVersion = 0.1.16`
@@ -252,9 +261,9 @@ ACP sessions spawned through `acpx` now receive the Logfire MCP server during
 session bootstrap, so channel or thread ACP runs can query production Logfire
 data without the native OpenClaw agents carrying a separate handwritten client.
 
-The build tree also carries a staged packaged copy under
-`rootfs/home/suguan/.openclaw/plugins/knowhere/` and a source checkout under
-`rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin/`.
+Installed Knowhere plugin files live on the host under
+`~/.openclaw/extensions/knowhere-claw/` after the npm install. They are runtime
+artifacts and are intentionally not mirrored under `build/`.
 
 ## File map
 
@@ -270,5 +279,7 @@ The main tracked files behind this overview are:
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
 - `rootfs/etc/systemd/journald.conf.d/50-openclaw-journal-size.conf`
 - `rootfs/home/suguan/.openclaw/workspace*/`
-- `rootfs/home/suguan/.openclaw/plugins/knowhere/`
-- `rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin/`
+
+Installed plugin payloads under `~/.openclaw/extensions/` and CLI-managed
+`plugins.installs` are host runtime state, so they are intentionally excluded
+from this tracked file map.

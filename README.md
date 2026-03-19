@@ -33,7 +33,9 @@ Read the repo from broad to narrow:
    `./scripts/render-build-state.sh --build-dir build/<host> --secrets-file .secrets/<host>.env`
 5. Apply the build tree to the server:
    `./scripts/apply-build-host.sh --host <ssh-host> --secrets-file .secrets/<host>.env`
-6. Optionally capture the live host into `.tmp/live/<host>/` for comparison:
+6. Install the external Knowhere plugin from npm on the host:
+   `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins install @ontos-ai/knowhere-claw --pin'`
+7. Optionally capture the live host into `.tmp/live/<host>/` for comparison:
    `OPENCLAW_SNAPSHOT_HOST=<ssh-host> ./scripts/snapshot.sh`
 
 For a reproducible clone of the current Oracle deployment on a different host,
@@ -50,7 +52,8 @@ directory, and use the same render/apply flow above.
 - Health: `./scripts/openclaw-host.sh --host <ssh-host> health`
 - Snapshot: `./scripts/openclaw-host.sh --host <ssh-host> snapshot`
 - Update: `./scripts/openclaw-host.sh --host <ssh-host> update`
-- Knowhere plugin deploy: `./scripts/deploy-knowhere-plugin.sh --host <ssh-host>`
+- Install Knowhere plugin from npm: `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins install @ontos-ai/knowhere-claw --pin'`
+- Update Knowhere plugin from npm: `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins update knowhere-claw'`
 - Discord multi-account cutover helper: `./scripts/oracle-discord-cutover.sh`
 - Oracle shortcut: `./scripts/oracle-openclaw.sh ...` still targets `oracle.ylioo.com` by default.
 
@@ -59,13 +62,14 @@ directory, and use the same render/apply flow above.
 - `build/` is tracked; `.secrets/` is local only.
 - `build/` and `operation-logs/` must contain only redacted or placeholder-safe values.
 - `operation-logs/` is local-only and must not be pushed.
-- Local Knowhere plugin payloads staged under `build/**/rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin/` must stay gitignored.
+- External plugin runtime files under `~/.openclaw/extensions/` and CLI-managed `plugins.installs` stay on the host; do not stage copied npm plugin payloads under `build/`.
 
 ## Build trees
 - `build/` is the host-path-oriented deploy source.
 - It mirrors files into exact host-style paths under `build/<host>/rootfs/`.
 - Edit `build/` directly when changing intended host state.
 - Render and apply it with `./scripts/render-build-state.sh` and `./scripts/apply-build-host.sh`.
+- External npm plugins such as `@ontos-ai/knowhere-claw` are installed on the host with the OpenClaw CLI, not mirrored into `build/`.
 - `./scripts/openclaw-host.sh --host <ssh-host> snapshot` captures a redacted live tree into `.tmp/live/<host>/` for comparison only.
 
 ## Documentation update rules
