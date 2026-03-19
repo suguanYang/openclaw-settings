@@ -14,9 +14,8 @@
   "acp": {
     "enabled": true,
     "backend": "acpx",
-    "defaultAgent": "claude",
+    "defaultAgent": "codex",
     "allowedAgents": [
-      "claude",
       "codex"
     ],
     "maxConcurrentSessions": 4,
@@ -26,66 +25,6 @@
   },
   "models": {
     "providers": {
-      "ikuncode-claude": {
-        "baseUrl": "${ANTHROPIC_BASE_URL}",
-        "apiKey": "${ANTHROPIC_API_KEY}",
-        "api": "anthropic-messages",
-        "headers": {
-          "User-Agent": "claude-cli/2.0.76 (external, cli)"
-        },
-        "models": [
-          {
-            "id": "claude-opus-4-5-20251101",
-            "name": "claude-opus-4-5-20251101",
-            "api": "anthropic-messages",
-            "cost": {
-              "input": 0,
-              "output": 0,
-              "cacheRead": 0,
-              "cacheWrite": 0
-            },
-            "contextWindow": 200000,
-            "maxTokens": 32000,
-            "compat": {}
-          },
-          {
-            "id": "claude-sonnet-4-6",
-            "name": "claude-sonnet-4-6",
-            "api": "anthropic-messages",
-            "reasoning": false,
-            "input": [
-              "text"
-            ],
-            "cost": {
-              "input": 0,
-              "output": 0,
-              "cacheRead": 0,
-              "cacheWrite": 0
-            },
-            "contextWindow": 200000,
-            "maxTokens": 32000,
-            "compat": {}
-          },
-          {
-            "id": "claude-opus-4-6",
-            "name": "claude-opus-4-6",
-            "api": "anthropic-messages",
-            "reasoning": false,
-            "input": [
-              "text"
-            ],
-            "cost": {
-              "input": 0,
-              "output": 0,
-              "cacheRead": 0,
-              "cacheWrite": 0
-            },
-            "contextWindow": 200000,
-            "maxTokens": 32000,
-            "compat": {}
-          }
-        ]
-      },
       "ikuncode-codex": {
         "baseUrl": "${OPENAI_BASE_URL}",
         "apiKey": "${OPENAI_API_KEY}",

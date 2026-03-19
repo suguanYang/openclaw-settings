@@ -25,13 +25,10 @@ Tracked sources:
 ## ACP and model setup
 
 - ACP is enabled with the `acpx` backend.
-- The default ACP agent remains `claude`.
-- Allowed ACP agents are `claude` and `codex`.
+- The default ACP agent is `codex`.
+- The only allowed ACP agent is `codex`.
 - The service loads `%h/.openclaw/acp-harness.env` through a systemd drop-in so
-  ACP-side harnesses can reuse the managed Anthropic and OpenAI-compatible
-  credentials.
-- The tracked Claude-side setting pins `claude-sonnet-4-5-20250929` in
-  `~/.claude/settings.json`.
+  ACP-side harnesses can reuse the managed OpenAI-compatible credentials.
 - The tracked Codex-side setting pins `gpt-5.3-codex` with
   `openai_base_url = https://api.ikuncode.cc/v1` in `~/.codex/config.toml`, so
   Codex ACP uses the same ikuncode OpenAI-compatible endpoint as the main
@@ -40,8 +37,9 @@ Tracked sources:
 - The ACP harness env also exports `CODEX_API_KEY` from the same managed
   secret because the current Codex CLI build on Oracle authenticates correctly
   with that alias.
-- `~/.acpx/config.json` keeps `claude` available and routes the `codex` ACP
-  harness through a local wrapper script at `~/.local/bin/openclaw-codex-acp`.
+- `~/.acpx/config.json` routes the `codex` ACP harness through a local wrapper
+  script at `~/.local/bin/openclaw-codex-acp`.
+- Operator-facing Discord usage for this ACP setup is documented in `ACP.md`.
 - That wrapper runs Codex ACP in a local Docker image because Oracle is still
   on Ubuntu 20.04 arm64, while the upstream `codex-acp` Linux arm64 binary
   currently requires newer glibc/OpenSSL runtime libraries than the host
@@ -64,8 +62,6 @@ Tracked sources:
 
 Provider layout:
 
-- `ikuncode-claude` uses the Anthropic-compatible endpoint at
-  `${ANTHROPIC_BASE_URL}` with Claude Opus/Sonnet model entries.
 - `ikuncode-codex` uses the OpenAI-compatible endpoint at
   `${OPENAI_BASE_URL}` with `gpt-5.3-codex`, `gpt-5.2-codex`, and `gpt-5.2`.
 - The default primary agent model is `ikuncode-codex/gpt-5.3-codex`.
@@ -270,7 +266,6 @@ The main tracked files behind this overview are:
 - `rootfs/home/suguan/.local/bin/openclaw-codex-acp`
 - `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
-- `rootfs/home/suguan/.claude/settings.json`
 - `rootfs/home/suguan/.openclaw/workspace*/`
 - `rootfs/home/suguan/.openclaw/plugins/knowhere/`
 - `rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin/`

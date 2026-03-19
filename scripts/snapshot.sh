@@ -71,7 +71,6 @@ collect_local() {
   collect_openclaw_tree_local "$base"
   copy_local_file "$HOME/.acpx/config.json"
   copy_local_file "$HOME/.codex/config.toml"
-  copy_local_file "$HOME/.claude/settings.json"
   copy_local_file "$HOME/.config/systemd/user/openclaw-gateway.service"
   copy_local_file "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf"
 }
@@ -127,7 +126,6 @@ done
 
 add_file "$HOME/.acpx/config.json"
 add_file "$HOME/.codex/config.toml"
-add_file "$HOME/.claude/settings.json"
 add_file "$HOME/.config/systemd/user/openclaw-gateway.service"
 add_file "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf"
 

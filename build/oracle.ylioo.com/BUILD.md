@@ -23,7 +23,6 @@ Typical tracked files here:
 - `rootfs/home/suguan/.local/bin/openclaw-codex-acp`
 - `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
 - `rootfs/home/suguan/.openclaw/workspace*/`
-- `rootfs/home/suguan/.claude/settings.json`
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
 
 ## What This Directory Does Not Contain

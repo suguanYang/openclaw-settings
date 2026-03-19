@@ -7,6 +7,7 @@ This directory is the path-faithful desired build tree for the Oracle OpenClaw h
 - `secrets.example.env`: secret contract for `.secrets/oracle.ylioo.com.env`.
 - `BUILD.md`: build-tree reference for this host and the render/apply workflow.
 - `OVERVIEW.md`: operator summary of the tracked Oracle OpenClaw setup.
+- `ACP.md`: operator usage guide for the current Oracle ACP flow.
 
 ## Refresh
 Edit `rootfs/` directly when you want to change intended Oracle state.
