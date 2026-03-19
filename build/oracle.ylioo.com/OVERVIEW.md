@@ -25,12 +25,42 @@ Tracked sources:
 ## ACP and model setup
 
 - ACP is enabled with the `acpx` backend.
-- The default ACP agent is `claude`, and allowed ACP agents are restricted to
-  `claude`.
+- The default ACP agent remains `claude`.
+- Allowed ACP agents are `claude` and `codex`.
 - The service loads `%h/.openclaw/acp-harness.env` through a systemd drop-in so
-  Claude ACP sessions can reuse the managed Anthropic credentials and headers.
+  ACP-side harnesses can reuse the managed Anthropic and OpenAI-compatible
+  credentials.
 - The tracked Claude-side setting pins `claude-sonnet-4-5-20250929` in
   `~/.claude/settings.json`.
+- The tracked Codex-side setting pins `gpt-5.3-codex` with
+  `openai_base_url = https://api.ikuncode.cc/v1` in `~/.codex/config.toml`, so
+  Codex ACP uses the same ikuncode OpenAI-compatible endpoint as the main
+  OpenClaw agents while reusing `OPENAI_API_KEY` from the ACP harness
+  environment.
+- The ACP harness env also exports `CODEX_API_KEY` from the same managed
+  secret because the current Codex CLI build on Oracle authenticates correctly
+  with that alias.
+- `~/.acpx/config.json` keeps `claude` available and routes the `codex` ACP
+  harness through a local wrapper script at `~/.local/bin/openclaw-codex-acp`.
+- That wrapper runs Codex ACP in a local Docker image because Oracle is still
+  on Ubuntu 20.04 arm64, while the upstream `codex-acp` Linux arm64 binary
+  currently requires newer glibc/OpenSSL runtime libraries than the host
+  provides.
+- The live host baseline behind that decision is:
+  - Ubuntu 20.04.6 LTS (`focal`) on `arm64`
+  - `glibc` 2.31 from the distro
+  - OpenSSL 1.1 on the host library path
+- The upstream `codex-acp` Linux arm64 binary was observed to require:
+  - `GLIBC_2.32`
+  - `GLIBC_2.33`
+  - `GLIBC_2.34`
+  - `libssl.so.3`
+  - `libcrypto.so.3`
+- This repository intentionally does not try to "fix" that mismatch by
+  replacing host `glibc` or OpenSSL in place. On this server, that would be an
+  operator-level OS/runtime upgrade risk rather than a safe app-level change.
+  The tracked approach is to keep the host stable and run Codex ACP in a
+  compatible container image instead.
 
 Provider layout:
 
@@ -195,10 +225,27 @@ Important details:
 - OpenClaw loads plugins from
   `/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin`.
 - `acpx` is configured with:
+  - `command = acpx`
+  - `expectedVersion = 0.1.16`
   - `cwd = /home/suguan/openclaw-workspace`
   - `permissionMode = approve-all`
   - `nonInteractivePermissions = fail`
-  - `mcpServers.logfire = uvx logfire-mcp@latest` with `LOGFIRE_READ_TOKEN`
+  - `mcpServers.logfire = bash -lc 'exec mcp-remote https://logfire-us.pydantic.dev/mcp --header "Authorization: Bearer $LOGFIRE_READ_TOKEN"'`
+    with `LOGFIRE_READ_TOKEN`
+- The apply flow also installs global ACP-side binaries needed by that config:
+  - `acpx@0.1.16`
+  - `@openai/codex@0.115.0`
+  - `mcp-remote@0.1.38`
+- The apply flow also builds `openclaw-codex-acp:ubuntu-24.04` from the
+  tracked Dockerfile under `~/.local/share/openclaw-codex-acp/`. That image
+  layers `uvx`, `@openai/codex@0.115.0`, `@zed-industries/codex-acp@0.10.0`,
+  and `mcp-remote@0.1.38` onto the existing
+  `openclaw-sandbox:ubuntu-24.04-full` base so Codex ACP can run on Oracle and
+  bridge the hosted Logfire MCP endpoint from inside the container.
+- The Logfire MCP path for ACP now uses the hosted endpoint through
+  `mcp-remote`, not the local `uvx logfire-mcp` stdio server. The hosted route
+  matched the working Oracle poller path and was the path verified live with
+  Codex ACP.
 - `knowhere-claw` stores data under
   `/home/suguan/.openclaw/plugin-state/knowhere`
   with `scopeMode = session`.
@@ -218,6 +265,10 @@ The main tracked files behind this overview are:
 - `rootfs/home/suguan/.openclaw/openclaw.json`
 - `rootfs/home/suguan/.openclaw/.env`
 - `rootfs/home/suguan/.openclaw/acp-harness.env`
+- `rootfs/home/suguan/.acpx/config.json`
+- `rootfs/home/suguan/.codex/config.toml`
+- `rootfs/home/suguan/.local/bin/openclaw-codex-acp`
+- `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
 - `rootfs/home/suguan/.claude/settings.json`
 - `rootfs/home/suguan/.openclaw/workspace*/`

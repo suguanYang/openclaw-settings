@@ -225,8 +225,17 @@ if ! command -v pnpm >/dev/null 2>&1; then
 fi
 
 hash -r
-pnpm add -g openclaw@latest
+pnpm add -g openclaw@latest acpx@0.1.16 @openai/codex@0.115.0 mcp-remote@0.1.38
 hash -r
+
+codex_acp_image_root="$HOME/.local/share/openclaw-codex-acp"
+if [ -f "$codex_acp_image_root/Dockerfile" ]; then
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "missing docker; cannot build tracked Codex ACP image" >&2
+    exit 1
+  fi
+  docker build -t openclaw-codex-acp:ubuntu-24.04 "$codex_acp_image_root"
+fi
 
 openclaw_bin="$(command -v openclaw || true)"
 if [ -z "$openclaw_bin" ] && [ -x "$PNPM_HOME/openclaw" ]; then

@@ -1,0 +1,5 @@
+# Oracle Codex CLI defaults.
+# Auth stays in the gateway env via OPENAI_API_KEY.
+model_provider = "openai"
+model = "gpt-5.3-codex"
+openai_base_url = "https://api.ikuncode.cc/v1"

@@ -18,6 +18,10 @@ Typical tracked files here:
 - `rootfs/home/suguan/.openclaw/openclaw.json`
 - `rootfs/home/suguan/.openclaw/.env`
 - `rootfs/home/suguan/.openclaw/acp-harness.env`
+- `rootfs/home/suguan/.acpx/config.json`
+- `rootfs/home/suguan/.codex/config.toml`
+- `rootfs/home/suguan/.local/bin/openclaw-codex-acp`
+- `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
 - `rootfs/home/suguan/.openclaw/workspace*/`
 - `rootfs/home/suguan/.claude/settings.json`
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`

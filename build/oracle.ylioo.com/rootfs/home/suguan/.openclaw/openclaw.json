@@ -16,7 +16,8 @@
     "backend": "acpx",
     "defaultAgent": "claude",
     "allowedAgents": [
-      "claude"
+      "claude",
+      "codex"
     ],
     "maxConcurrentSessions": 4,
     "runtime": {
@@ -570,14 +571,17 @@
       "acpx": {
         "enabled": true,
         "config": {
+          "command": "acpx",
+          "expectedVersion": "0.1.16",
           "cwd": "/home/suguan/openclaw-workspace",
           "permissionMode": "approve-all",
           "nonInteractivePermissions": "fail",
           "mcpServers": {
             "logfire": {
-              "command": "uvx",
+              "command": "bash",
               "args": [
-                "logfire-mcp@latest"
+                "-lc",
+                "exec mcp-remote https://logfire-us.pydantic.dev/mcp --header \"Authorization: Bearer $LOGFIRE_READ_TOKEN\""
               ],
               "env": {
                 "LOGFIRE_READ_TOKEN": "${LOGFIRE_READ_TOKEN}"
