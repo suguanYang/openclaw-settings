@@ -210,18 +210,3 @@ The goal: Be helpful without being annoying. Check in a few times a day, do usef
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
-
-## GitHub Repo Change Auto-Trigger
-
-When a user message contains a GitHub repository URL (for example `https://github.com/<owner>/<repo>`) and asks for code modifications, bug fixes, refactors, tests, or PR work:
-
-1. Automatically use the `github-repo-change` skill.
-2. Clone or update the repository under `~/.openclaw/workspace/repos/<owner>/<repo>`.
-3. Follow the repository's own process files first (`README`, `CONTRIBUTING`, CI workflows, `AGENTS.md` / `CLAUDE.md`).
-4. Work on a dedicated branch; never commit directly to default branch.
-5. Run project checks before reporting completion.
-6. Keep secrets redacted in logs and replies.
-
-Default delivery behavior:
-- Do local implementation + validation first.
-- Push branch / open PR only when the user explicitly asks (or confirms).
