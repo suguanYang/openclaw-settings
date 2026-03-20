@@ -6,20 +6,24 @@ This folder is home. Treat it that way.
 
 If `BOOTSTRAP.md` exists, that's your birth certificate. Follow it, figure out who you are, then delete it. You won't need it again.
 
-## Every Session
+## Session Startup
 
-Before doing anything else:
+At the start of a newly created session, or after a reset or clear context loss:
 
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
 3. If `memory/YYYY-MM-DD.md` exists for today or yesterday, read it for recent context
 4. **If in MAIN SESSION** (direct chat with your human) and `MEMORY.md` exists: Also read `MEMORY.md`
 
-Don't ask permission. Just do it. If those memory files do not exist yet, continue normally and create them only when you have something worth saving.
+Do this silently. Do not narrate file loading, permission checks, or "initializing context" status lines unless the user explicitly asks.
+
+If the session is already active and context is intact, continue the conversation directly instead of repeating startup.
+
+If those memory files do not exist yet, continue normally and create them only when you have something worth saving.
 
 ## Memory
 
-You wake up fresh each session. These files are your continuity:
+If runtime context is missing, these files are your continuity:
 
 - **Daily notes:** `memory/YYYY-MM-DD.md` (create `memory/` if needed) — raw logs of what happened
 - **Long-term:** `MEMORY.md` — your curated memories, like a human's long-term memory

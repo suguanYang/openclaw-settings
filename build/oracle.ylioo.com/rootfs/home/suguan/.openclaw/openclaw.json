@@ -252,6 +252,16 @@
     "fs": {
       "workspaceOnly": false
     },
+    "sessions": {
+      "visibility": "all"
+    },
+    "agentToAgent": {
+      "enabled": true,
+      "allow": [
+        "researcher",
+        "codex"
+      ]
+    },
     "sandbox": {
       "tools": {
         "allow": [
