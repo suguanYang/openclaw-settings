@@ -10,7 +10,6 @@ This directory contains host-specific build packages.
 ## Rules
 - `build/` is the primary tracked deploy source.
 - `.secrets/` remains local-only and is merged during render/apply.
-- Local Knowhere plugin payloads staged under `build/**/rootfs/home/suguan/github.com/ontosAI/knowhere-openclaw-plugin/` stay gitignored unless the repo policy changes.
 - Untracked live captures belong under `.tmp/live/`, not under `build/`.
 
 ## Safety

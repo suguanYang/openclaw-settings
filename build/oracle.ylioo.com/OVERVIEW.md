@@ -41,6 +41,10 @@ Tracked sources:
   with that alias.
 - `~/.acpx/config.json` routes the `codex` ACP harness through a local wrapper
   script at `~/.local/bin/openclaw-codex-acp`.
+- That wrapper now mounts a persistent Codex home from
+  `~/.local/share/openclaw-codex-acp/home` into the container so Codex ACP
+  session state survives ordinary turn-to-turn re-entry instead of always
+  reseeding from an empty home.
 - Operator-facing Discord usage for this ACP setup is documented in `ACP.md`.
 - That wrapper runs Codex ACP in a local Docker image because Oracle is still
   on Ubuntu 20.04 arm64, while the upstream `codex-acp` Linux arm64 binary
@@ -224,8 +228,10 @@ Important details:
 - The explicitly allowed external plugins are `acpx` and `knowhere-claw`.
 - `knowhere-claw` is treated as the external npm plugin
   `@ontos-ai/knowhere-claw`, not a local source checkout.
+- The current Oracle target is the pinned npm spec
+  `@ontos-ai/knowhere-claw@0.2.1`.
 - Operators should install it with
-  `openclaw plugins install @ontos-ai/knowhere-claw --pin` and update it with
+  `openclaw plugins install @ontos-ai/knowhere-claw@0.2.1 --pin` and update it with
   `openclaw plugins update knowhere-claw`.
 - OpenClaw installs npm plugins under `~/.openclaw/extensions/<id>/`; this
   repo tracks the desired config entry for `knowhere-claw`, not a vendored

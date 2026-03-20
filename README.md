@@ -34,7 +34,7 @@ Read the repo from broad to narrow:
 5. Apply the build tree to the server:
    `./scripts/apply-build-host.sh --host <ssh-host> --secrets-file .secrets/<host>.env`
 6. Install the external Knowhere plugin from npm on the host:
-   `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins install @ontos-ai/knowhere-claw --pin'`
+   `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins install @ontos-ai/knowhere-claw@0.2.1 --pin'`
 7. Optionally capture the live host into `.tmp/live/<host>/` for comparison:
    `OPENCLAW_SNAPSHOT_HOST=<ssh-host> ./scripts/snapshot.sh`
 
@@ -52,7 +52,7 @@ directory, and use the same render/apply flow above.
 - Health: `./scripts/openclaw-host.sh --host <ssh-host> health`
 - Snapshot: `./scripts/openclaw-host.sh --host <ssh-host> snapshot`
 - Update: `./scripts/openclaw-host.sh --host <ssh-host> update`
-- Install Knowhere plugin from npm: `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins install @ontos-ai/knowhere-claw --pin'`
+- Install Knowhere plugin from npm: `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins install @ontos-ai/knowhere-claw@0.2.1 --pin'`
 - Update Knowhere plugin from npm: `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins update knowhere-claw'`
 - Discord multi-account cutover helper: `./scripts/oracle-discord-cutover.sh`
 - Oracle shortcut: `./scripts/oracle-openclaw.sh ...` still targets `oracle.ylioo.com` by default.
