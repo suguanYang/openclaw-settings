@@ -93,6 +93,8 @@ Behavioral highlights:
   host instead of the sandbox.
 - `engineer`, `reporter`, and `tracker` keep `sandbox.mode = all` with
   read-only workspace access.
+- The `tracker` Discord account requires an explicit `@mention` in the main
+  channel `565501941510045707`, matching the guild-level default.
 - Default agent settings enable local memory search, safeguard compaction, and
   bounded subagent fan-out.
 

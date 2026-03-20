@@ -458,7 +458,17 @@
           "name": "OpenClaw Tracker",
           "groupPolicy": "allowlist",
           "streaming": "off",
-          "token": "${DISCORD_TRACKER_TOKEN}"
+          "token": "${DISCORD_TRACKER_TOKEN}",
+          "guilds": {
+            "565501940742619145": {
+              "channels": {
+                "565501941510045707": {
+                  "allow": true,
+                  "requireMention": true
+                }
+              }
+            }
+          }
         }
       }
     }
