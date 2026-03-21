@@ -4,6 +4,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HOST="${OPENCLAW_HOST:-}"
 SERVICE_NAME="${OPENCLAW_SERVICE_NAME:-openclaw-gateway.service}"
+SERVICE_MANAGER="${OPENCLAW_SERVICE_MANAGER:-auto}"
+LAUNCHD_LABEL="${OPENCLAW_LAUNCHD_LABEL:-ai.openclaw.gateway}"
 OPENCLAW_STATE_DIR="${OPENCLAW_STATE_DIR:-}"
 LOG_TITLE="${OPENCLAW_LOG_TITLE:-OpenClaw Host Operation Log}"
 LOG_RECORDER="${OPENCLAW_LOG_RECORDER:-scripts/openclaw-host.sh}"
@@ -17,19 +19,22 @@ Usage: ./scripts/openclaw-host.sh --host <ssh-host> [options] <command> [args]
 Options:
   --host <ssh-host>        SSH host or alias. Defaults to OPENCLAW_HOST if set
   --service <name>         systemd user service name (default: openclaw-gateway.service)
+  --service-manager <kind> Remote service manager: auto, systemd, or launchd
+                           (default: auto)
+  --launchd-label <label>  launchd label (default: ai.openclaw.gateway)
   --openclaw-home <path>   Remote OpenClaw state dir (default: ~/.openclaw)
   -h, --help               Show this help
 
 Commands:
   snapshot         Capture a redacted untracked live snapshot from the target host into .tmp/live/<host>/
-  status           Show the current systemd user service status
+  status           Show the current gateway service status
   restart          Restart the gateway service and print a short status block
-  logs [n]         Tail gateway logs with journalctl (default: 120 lines)
+  logs [n]         Show the latest gateway logs (default: 120 lines)
   watch-agent <agent> [--raw] [--tool-result <full|truncate>]
                    Stream the latest session transcript for one agent
                    Pretty mode prints all transcript record types; truncated mode uses
                    OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS (default: 100)
-  service-file     Print the live systemd user service file
+  service-file     Print the live service definition
   runtime-exec <cmd>
                    Run a remote shell command with the gateway runtime PATH/env setup
   doctor           Run OpenClaw doctor using the service's current Node + entrypoint
@@ -173,25 +178,273 @@ normalize_remote_path() {
   esac
 }
 service_name=__SERVICE_NAME__
+service_manager_input=__SERVICE_MANAGER_INPUT__
+launchd_label=__LAUNCHD_LABEL__
 openclaw_home_input=__OPENCLAW_HOME_INPUT__
 openclaw_home="$(normalize_remote_path "$openclaw_home_input")"
-service="$HOME/.config/systemd/user/$service_name"
-exec_start="$(sed -n 's/^ExecStart=//p' "$service")"
-if [ -z "$exec_start" ]; then
-  echo "missing ExecStart in $service" >&2
+service_manager=""
+service_file_path=""
+launchd_domain="gui/$(id -u)/$launchd_label"
+launchd_plist="$HOME/Library/LaunchAgents/$launchd_label.plist"
+systemd_service_path="$HOME/.config/systemd/user/$service_name"
+service_path=""
+stdout_log_path=""
+stderr_log_path=""
+node_bin=""
+openclaw_js=""
+pnpm_home=""
+pnpm_bin=""
+
+is_systemd_available() {
+  command -v systemctl >/dev/null 2>&1 && [ -f "$systemd_service_path" ]
+}
+
+is_launchd_available() {
+  command -v launchctl >/dev/null 2>&1 && [ -f "$launchd_plist" ]
+}
+
+ensure_plist_buddy() {
+  if [ ! -x /usr/libexec/PlistBuddy ]; then
+    echo "launchd support requires /usr/libexec/PlistBuddy" >&2
+    exit 1
+  fi
+}
+
+read_launchd_value() {
+  local key="$1"
+  /usr/libexec/PlistBuddy -c "Print :$key" "$launchd_plist"
+}
+
+detect_service_manager() {
+  case "$service_manager_input" in
+    auto)
+      if is_systemd_available; then
+        service_manager="systemd"
+        return 0
+      fi
+      if is_launchd_available; then
+        service_manager="launchd"
+        return 0
+      fi
+      ;;
+    systemd)
+      if is_systemd_available; then
+        service_manager="systemd"
+        return 0
+      fi
+      echo "systemd service file not found: $systemd_service_path" >&2
+      exit 1
+      ;;
+    launchd)
+      if is_launchd_available; then
+        service_manager="launchd"
+        return 0
+      fi
+      echo "launchd plist not found: $launchd_plist" >&2
+      exit 1
+      ;;
+    *)
+      echo "unsupported service manager: $service_manager_input" >&2
+      exit 1
+      ;;
+  esac
+
+  echo "unable to detect a supported service manager on this host" >&2
+  echo "checked systemd unit: $systemd_service_path" >&2
+  echo "checked launchd plist: $launchd_plist" >&2
   exit 1
-fi
-node_bin="${exec_start%% *}"
-rest="${exec_start#* }"
-openclaw_js="${rest%% *}"
-pnpm_home="$HOME/.local/share/pnpm"
-npm_bin="${node_bin%/node}/npm"
-export PNPM_HOME="$pnpm_home"
-export PATH="$pnpm_home:$(dirname "$node_bin"):$PATH"
-pnpm_bin="$(command -v pnpm || true)"
-if [ -z "$pnpm_bin" ]; then
-  pnpm_bin="$pnpm_home/pnpm"
-fi
+}
+
+configure_systemd_runtime() {
+  local exec_start
+  local rest
+
+  service_file_path="$systemd_service_path"
+  exec_start="$(sed -n 's/^ExecStart=//p' "$service_file_path")"
+  if [ -z "$exec_start" ]; then
+    echo "missing ExecStart in $service_file_path" >&2
+    exit 1
+  fi
+
+  node_bin="${exec_start%% *}"
+  rest="${exec_start#* }"
+  openclaw_js="${rest%% *}"
+}
+
+configure_launchd_runtime() {
+  ensure_plist_buddy
+
+  service_file_path="$launchd_plist"
+  node_bin="$(read_launchd_value 'ProgramArguments:0' 2>/dev/null || true)"
+  openclaw_js="$(read_launchd_value 'ProgramArguments:1' 2>/dev/null || true)"
+  stdout_log_path="$(read_launchd_value 'StandardOutPath' 2>/dev/null || true)"
+  stderr_log_path="$(read_launchd_value 'StandardErrorPath' 2>/dev/null || true)"
+  service_path="$(read_launchd_value 'EnvironmentVariables:PATH' 2>/dev/null || true)"
+
+  if [ -z "$node_bin" ] || [ -z "$openclaw_js" ]; then
+    echo "missing ProgramArguments in $service_file_path" >&2
+    exit 1
+  fi
+}
+
+configure_package_runtime() {
+  local candidate
+
+  if [ -n "$service_path" ]; then
+    export PATH="$service_path:$PATH"
+  fi
+
+  pnpm_bin="$(command -v pnpm || true)"
+  if [ -n "$pnpm_bin" ]; then
+    pnpm_home="$(cd "$(dirname "$pnpm_bin")" && pwd)"
+  else
+    for candidate in \
+      "$HOME/.local/share/pnpm/pnpm" \
+      "$HOME/Library/pnpm/pnpm" \
+      "$(dirname "$node_bin")/pnpm"; do
+      if [ -x "$candidate" ]; then
+        pnpm_bin="$candidate"
+        pnpm_home="$(cd "$(dirname "$candidate")" && pwd)"
+        break
+      fi
+    done
+  fi
+
+  if [ -z "$pnpm_home" ]; then
+    if [ -d "$HOME/.local/share/pnpm" ]; then
+      pnpm_home="$HOME/.local/share/pnpm"
+    elif [ -d "$HOME/Library/pnpm" ]; then
+      pnpm_home="$HOME/Library/pnpm"
+    fi
+  fi
+
+  if [ -n "$pnpm_home" ]; then
+    export PNPM_HOME="$pnpm_home"
+    export PATH="$pnpm_home:$(dirname "$node_bin"):$PATH"
+  else
+    export PATH="$(dirname "$node_bin"):$PATH"
+  fi
+
+  if [ -z "$pnpm_bin" ] && [ -n "$pnpm_home" ] && [ -x "$pnpm_home/pnpm" ]; then
+    pnpm_bin="$pnpm_home/pnpm"
+  fi
+}
+
+ensure_pnpm_available() {
+  if [ -z "$pnpm_bin" ]; then
+    echo "pnpm not found in PATH or known install directories" >&2
+    exit 1
+  fi
+}
+
+print_service_status() {
+  case "$service_manager" in
+    systemd)
+      systemctl --user status "$service_name" --no-pager | sed -n '1,80p'
+      ;;
+    launchd)
+      launchctl print "$launchd_domain" | sed -n '1,80p'
+      ;;
+  esac
+}
+
+restart_service() {
+  case "$service_manager" in
+    systemd)
+      systemctl --user restart "$service_name"
+      ;;
+    launchd)
+      launchctl kickstart -k "$launchd_domain"
+      ;;
+  esac
+}
+
+print_service_logs() {
+  local lines="$1"
+  local log_paths=()
+
+  case "$service_manager" in
+    systemd)
+      journalctl --user -u "$service_name" -n "$lines" --no-pager
+      ;;
+    launchd)
+      if [ -n "$stdout_log_path" ] && [ -f "$stdout_log_path" ]; then
+        log_paths+=("$stdout_log_path")
+      fi
+      if [ -n "$stderr_log_path" ] && [ -f "$stderr_log_path" ]; then
+        log_paths+=("$stderr_log_path")
+      fi
+      if [ "${#log_paths[@]}" -eq 0 ]; then
+        echo "launchd log files not found for $launchd_label" >&2
+        exit 1
+      fi
+      tail -n "$lines" "${log_paths[@]}"
+      ;;
+  esac
+}
+
+print_service_file() {
+  case "$service_manager" in
+    systemd)
+      sed -n '1,220p' "$service_file_path"
+      ;;
+    launchd)
+      plutil -p "$service_file_path"
+      ;;
+  esac
+}
+
+reload_service_manager() {
+  case "$service_manager" in
+    systemd)
+      systemctl --user daemon-reload
+      ;;
+    launchd)
+      :
+      ;;
+  esac
+}
+
+find_latest_session_file() {
+  local sessions_dir="$1"
+
+  if find "$sessions_dir" -maxdepth 1 -type f -name '*.jsonl' -printf '' >/dev/null 2>&1; then
+    find "$sessions_dir" -maxdepth 1 -type f -name '*.jsonl' -printf '%T@ %p\n' \
+      | sort -nr \
+      | head -n 1 \
+      | cut -d' ' -f2-
+    return 0
+  fi
+
+  find "$sessions_dir" -maxdepth 1 -type f -name '*.jsonl' -exec sh -c '
+    for file do
+      if stat -c "%Y %n" "$file" >/dev/null 2>&1; then
+        stat -c "%Y %n" "$file"
+        continue
+      fi
+      if stat -f "%m %N" "$file" >/dev/null 2>&1; then
+        stat -f "%m %N" "$file"
+        continue
+      fi
+      echo "unsupported stat implementation for $file" >&2
+      exit 1
+    done
+  ' sh {} + \
+    | sort -nr \
+    | head -n 1 \
+    | cut -d' ' -f2-
+}
+
+detect_service_manager
+case "$service_manager" in
+  systemd)
+    configure_systemd_runtime
+    ;;
+  launchd)
+    configure_launchd_runtime
+    ;;
+esac
+configure_package_runtime
 if [ -f "$openclaw_home/acp-harness.env" ]; then
   set -a
   . "$openclaw_home/acp-harness.env"
@@ -203,6 +456,8 @@ run_openclaw() {
 EOFBODY
 )"
   body="${body//__SERVICE_NAME__/$(printf '%q' "$SERVICE_NAME")}"
+  body="${body//__SERVICE_MANAGER_INPUT__/$(printf '%q' "$SERVICE_MANAGER")}"
+  body="${body//__LAUNCHD_LABEL__/$(printf '%q' "$LAUNCHD_LABEL")}"
   body="${body//__OPENCLAW_HOME_INPUT__/$(printf '%q' "$OPENCLAW_STATE_DIR")}"
   printf '%s' "$body"
 }
@@ -239,14 +494,6 @@ snapshot_cmd() {
   printf '%s' "$cmd"
 }
 
-service_remote_cmd() {
-  local action="$1"
-  shift
-  local body="$*"
-
-  run_logged_remote "$action" "service_name=$(printf '%q' "$SERVICE_NAME"); $body"
-}
-
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --host)
@@ -255,6 +502,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --service|--service-name)
       SERVICE_NAME="$2"
+      shift 2
+      ;;
+    --service-manager)
+      SERVICE_MANAGER="$2"
+      shift 2
+      ;;
+    --launchd-label)
+      LAUNCHD_LABEL="$2"
       shift 2
       ;;
     --openclaw-home|--state-dir)
@@ -294,14 +549,15 @@ case "$cmd" in
     run_logged_local "snapshot" "$(snapshot_cmd)"
     ;;
   status)
-    service_remote_cmd "status" 'systemctl --user status "$service_name" --no-pager | sed -n '"'"'1,80p'"'"''
+    run_remote_openclaw "status" 'print_service_status'
     ;;
   restart)
-    service_remote_cmd "restart" 'systemctl --user restart "$service_name" && systemctl --user status "$service_name" --no-pager | sed -n '"'"'1,80p'"'"''
+    run_remote_openclaw "restart" 'restart_service
+print_service_status'
     ;;
   logs)
     lines="${1:-120}"
-    service_remote_cmd "logs" 'journalctl --user -u "$service_name" -n '"$lines"' --no-pager'
+    run_remote_openclaw "logs" 'print_service_logs '"$(printf '%q' "$lines")"
     ;;
   watch-agent)
     if [ "$#" -eq 0 ]; then
@@ -355,7 +611,7 @@ if [ ! -d "\$sessions_dir" ]; then
   exit 1
 fi
 
-latest_session="\$(find "\$sessions_dir" -maxdepth 1 -type f -name '*.jsonl' -printf '%T@ %p\n' | sort -nr | head -n 1 | cut -d' ' -f2-)"
+latest_session="\$(find_latest_session_file "\$sessions_dir")"
 if [ -z "\$latest_session" ]; then
   echo "no session transcripts found for agent: \$agent_name" >&2
   exit 1
@@ -659,7 +915,7 @@ EOF
     stream_remote_openclaw "$remote_watch_script"
     ;;
   service-file)
-    service_remote_cmd "service-file" 'sed -n '"'"'1,220p'"'"' "$HOME/.config/systemd/user/$service_name"'
+    run_remote_openclaw "service-file" 'print_service_file'
     ;;
   runtime-exec)
     if [ "$#" -eq 0 ]; then
@@ -675,12 +931,13 @@ EOF
     run_remote_openclaw "health" 'run_openclaw health'
     ;;
   update|update-pnpm|update-npm)
-    run_remote_openclaw "update-pnpm" '"$pnpm_bin" add -g openclaw@latest
-"$pnpm_home/openclaw" doctor --yes --fix
-systemctl --user daemon-reload
-systemctl --user restart "$service_name"
-"$pnpm_home/openclaw" health
-systemctl --user status "$service_name" --no-pager | sed -n "1,80p"'
+    run_remote_openclaw "update-pnpm" 'ensure_pnpm_available
+"$pnpm_bin" add -g openclaw@latest
+run_openclaw doctor --yes --fix
+reload_service_manager
+restart_service
+run_openclaw health
+print_service_status'
     ;;
   exec)
     if [ "$#" -eq 0 ]; then

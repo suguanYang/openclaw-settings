@@ -14,6 +14,17 @@ Local Git repo for managing, auditing, and documenting host-specific OpenClaw de
 - Keep that checkout up to date before relying on it. At minimum, refresh from upstream and verify the local reference is on the expected branch/commit.
 - The local reference is an aid, not the source of truth. If there is any mismatch between `references/openclaw/`, the official docs, and upstream GitHub, re-check upstream first.
 
+## External library rule
+- npm-installed OpenClaw plugins are external libraries, not repo-owned code.
+- Do not patch, vendor, mirror, or commit source changes for external plugins from this repository.
+- Do not edit host-side external plugin files to fix behavior from work in `openclaw-settings`.
+- If an external plugin is wrong, either update the pinned package version or fix it in the plugin's own upstream repository.
+
+## Maintained hosts
+- This repo may need to maintain more than one OpenClaw deployment at the same time.
+- `oracle.ylioo.com` and `macmini.openclaw` are both in scope for operator docs, helper scripts, and host-specific deployment state kept here.
+- Keep host-specific changes clearly scoped to the correct host instead of assuming Oracle-only behavior.
+
 ## Information hierarchy
 Read the repo from broad to narrow:
 1. `README.md`: repo purpose, top-level data layers, and common operator flows.
@@ -56,6 +67,9 @@ directory, and use the same render/apply flow above.
 - Update Knowhere plugin from npm: `./scripts/openclaw-host.sh --host <ssh-host> runtime-exec 'openclaw plugins update knowhere-claw'`
 - Discord multi-account cutover helper: `./scripts/oracle-discord-cutover.sh`
 - Oracle shortcut: `./scripts/oracle-openclaw.sh ...` still targets `oracle.ylioo.com` by default.
+- Macmini shortcut: `./scripts/macmini-openclaw.sh ...` targets `macmini.openclaw` by default.
+- Both shortcut scripts support the same commands as `./scripts/openclaw-host.sh`, including `status`, `logs`, `watch-agent`, `health`, `restart`, and `update`.
+- `openclaw-host.sh` auto-detects `systemd` or `launchd`; use `--service-manager` and `--launchd-label` to override when needed.
 
 ## Redaction and secrets
 - Never commit plaintext secrets.
@@ -69,7 +83,7 @@ directory, and use the same render/apply flow above.
 - It mirrors files into exact host-style paths under `build/<host>/rootfs/`.
 - Edit `build/` directly when changing intended host state.
 - Render and apply it with `./scripts/render-build-state.sh` and `./scripts/apply-build-host.sh`.
-- External npm plugins such as `@ontos-ai/knowhere-claw` are installed on the host with the OpenClaw CLI, not mirrored into `build/`.
+- External npm plugins are installed on the host with the OpenClaw CLI, not mirrored into `build/`.
 - `./scripts/openclaw-host.sh --host <ssh-host> snapshot` captures a redacted live tree into `.tmp/live/<host>/` for comparison only.
 
 ## Documentation update rules
