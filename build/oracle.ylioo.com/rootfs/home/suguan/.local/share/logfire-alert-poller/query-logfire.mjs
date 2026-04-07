@@ -33,32 +33,19 @@ async function run() {
   try {
     await client.connect(transport);
     const listToolsResult = await client.listTools();
-    const toolNames = new Set(
+    const toolsByName = new Map(
       (listToolsResult.tools ?? [])
-        .map((tool) => String(tool.name ?? '').trim())
-        .filter(Boolean),
+        .map((tool) => [String(tool.name ?? '').trim(), tool])
+        .filter(([toolName]) => Boolean(toolName)),
     );
 
     let result;
-    if (toolNames.has('query_run')) {
-      result = await client.callTool({
-        name: 'query_run',
-        arguments: {
-          project: args.project || undefined,
-          query: args.query,
-          age: args.ageMinutes,
-        },
-      });
-    } else if (toolNames.has('arbitrary_query')) {
-      result = await client.callTool({
-        name: 'arbitrary_query',
-        arguments: {
-          query: args.query,
-          age: `${args.ageMinutes}m`,
-        },
-      });
+    if (toolsByName.has('query_run')) {
+      result = await callQueryTool(client, toolsByName.get('query_run'), args);
+    } else if (toolsByName.has('arbitrary_query')) {
+      result = await callQueryTool(client, toolsByName.get('arbitrary_query'), args);
     } else {
-      const known = [...toolNames].sort().join(', ') || '(none)';
+      const known = [...toolsByName.keys()].sort().join(', ') || '(none)';
       throw new Error(
         `Logfire MCP server does not expose a supported query tool. Available tools: ${known}`,
       );
@@ -78,6 +65,120 @@ async function run() {
     }
     await transport.close().catch(() => {});
   }
+}
+
+async function callQueryTool(client, tool, args) {
+  const toolName = String(tool?.name ?? '').trim();
+  if (!toolName) {
+    throw new Error('missing Logfire MCP query tool name');
+  }
+
+  const candidates = buildToolArgumentCandidates(toolName, tool?.inputSchema, args);
+  let lastValidationError = '';
+
+  for (const candidate of candidates) {
+    const result = await client.callTool({
+      name: toolName,
+      arguments: candidate,
+    });
+    if (!result.isError) {
+      return result;
+    }
+
+    const message = extractToolErrorText(result);
+    if (!isArgumentValidationError(message)) {
+      throw new Error(message);
+    }
+    lastValidationError = message;
+  }
+
+  throw new Error(lastValidationError || `Logfire MCP tool ${toolName} returned an error`);
+}
+
+function buildToolArgumentCandidates(toolName, inputSchema, args) {
+  const propertyNames = readSchemaPropertyNames(inputSchema);
+  const timeRange = buildTimeRange(args.ageMinutes);
+  const baseArguments = {
+    query: args.query,
+  };
+  if (toolName === 'query_run' && args.project && shouldIncludeProperty(propertyNames, 'project')) {
+    baseArguments.project = args.project;
+  }
+
+  const candidates = [];
+  if (
+    propertyNames.size === 0 ||
+    propertyNames.has('start_timestamp') ||
+    propertyNames.has('end_timestamp')
+  ) {
+    const timeRangeArguments = {
+      ...baseArguments,
+    };
+    if (shouldIncludeProperty(propertyNames, 'start_timestamp')) {
+      timeRangeArguments.start_timestamp = timeRange.startTimestamp;
+    }
+    if (shouldIncludeProperty(propertyNames, 'end_timestamp')) {
+      timeRangeArguments.end_timestamp = timeRange.endTimestamp;
+    }
+    candidates.push(timeRangeArguments);
+  }
+
+  if (propertyNames.size === 0 || propertyNames.has('age')) {
+    candidates.push({
+      ...baseArguments,
+      age: toolName === 'query_run' ? args.ageMinutes : `${args.ageMinutes}m`,
+    });
+  }
+
+  if (candidates.length === 0) {
+    candidates.push(baseArguments);
+  }
+
+  return dedupeArguments(candidates);
+}
+
+function readSchemaPropertyNames(inputSchema) {
+  if (!inputSchema || typeof inputSchema !== 'object') {
+    return new Set();
+  }
+  const properties = inputSchema.properties;
+  if (!properties || typeof properties !== 'object') {
+    return new Set();
+  }
+  return new Set(Object.keys(properties));
+}
+
+function shouldIncludeProperty(propertyNames, propertyName) {
+  return propertyNames.size === 0 || propertyNames.has(propertyName);
+}
+
+function buildTimeRange(ageMinutes) {
+  const endDate = new Date();
+  const startDate = new Date(endDate.getTime() - ageMinutes * 60 * 1000);
+  return {
+    startTimestamp: startDate.toISOString(),
+    endTimestamp: endDate.toISOString(),
+  };
+}
+
+function dedupeArguments(candidates) {
+  const dedupedCandidates = [];
+  const seen = new Set();
+  for (const candidate of candidates) {
+    const key = JSON.stringify(candidate);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    dedupedCandidates.push(candidate);
+  }
+  return dedupedCandidates;
+}
+
+function isArgumentValidationError(message) {
+  return /validation error|unexpected keyword argument|field required|input should/i.test(
+    String(message),
+  );
 }
 
 function parseArgs(argv) {

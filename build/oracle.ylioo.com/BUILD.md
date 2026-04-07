@@ -24,7 +24,6 @@ Typical tracked files here:
 - `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
 - `rootfs/home/suguan/.openclaw/workspace*/`
 - `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
-- `rootfs/etc/systemd/journald.conf.d/50-openclaw-journal-size.conf`
 
 ## What This Directory Does Not Contain
 

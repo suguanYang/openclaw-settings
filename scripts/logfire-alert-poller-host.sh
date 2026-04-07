@@ -156,6 +156,11 @@ EOF
     remote_script="$(cat <<EOF
 set -euo pipefail
 state_path=$(printf '%q' "$STATE_PATH")
+case "\$state_path" in
+  "~/"*)
+    state_path="\$HOME/\${state_path#\~/}"
+    ;;
+esac
 if [ ! -f "\$state_path" ]; then
   echo "state file not found: \$state_path" >&2
   exit 1

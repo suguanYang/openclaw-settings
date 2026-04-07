@@ -298,7 +298,7 @@ def build_default_query(settings: Settings) -> str:
     )
     return (
         "SELECT\n"
-        "  created_at,\n"
+        "  start_timestamp AS created_at,\n"
         "  service_name,\n"
         "  deployment_environment,\n"
         "  exception_type,\n"
@@ -315,7 +315,7 @@ def build_default_query(settings: Settings) -> str:
         ")\n"
         f"{service_filter}"
         f"{environment_filter}"
-        "ORDER BY created_at DESC\n"
+        "ORDER BY start_timestamp DESC\n"
         f"LIMIT {settings.query_limit}"
     )
 
@@ -417,6 +417,7 @@ def normalize_events(rows: Iterable[Mapping[str, Any]], settings: Settings) -> l
             first_non_empty(
                 row,
                 "created_at",
+                "start_timestamp",
                 "timestamp",
                 "time",
             ),
