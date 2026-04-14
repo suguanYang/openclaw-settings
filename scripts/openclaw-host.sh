@@ -30,10 +30,14 @@ Commands:
   status           Show the current gateway service status
   restart          Restart the gateway service and print a short status block
   logs [n]         Show the latest gateway logs (default: 120 lines)
+  logs-knowhere [n]
+                   Show recent gateway logs filtered to Knowhere-related records
   watch-agent <agent> [--raw] [--tool-result <full|truncate>]
                    Stream the latest session transcript for one agent
                    Pretty mode prints all transcript record types; truncated mode uses
                    OPENCLAW_WATCH_TOOL_RESULT_MAX_CHARS (default: 100)
+  watch-knowhere [n]
+                   Follow gateway logs live, filtered to Knowhere-related records
   service-file     Print the live service definition
   runtime-exec <cmd>
                    Run a remote shell command with the gateway runtime PATH/env setup
@@ -42,6 +46,10 @@ Commands:
   update           Update the global pnpm install, repair the service, then restart + health
   update-pnpm      Same as update
   update-npm       Backward-compatible alias for update-pnpm
+  install-gateway-no-proxy <csv>
+                   Reinstall the gateway service with a merged NO_PROXY list.
+                   Launchd hosts reuse the current plist proxy env and regenerate
+                   the LaunchAgent through OpenClaw instead of editing the plist directly.
   exec <cmd>       Run an arbitrary remote shell command
 USAGE
 }
@@ -383,6 +391,65 @@ print_service_logs() {
   esac
 }
 
+print_service_logs_filtered() {
+  local lines="$1"
+  local pattern="$2"
+  local log_paths=()
+
+  case "$service_manager" in
+    systemd)
+      journalctl --user -u "$service_name" -n "$lines" --no-pager \
+        | awk -v pattern="$pattern" '$0 ~ pattern { print }'
+      ;;
+    launchd)
+      if [ -n "$stdout_log_path" ] && [ -f "$stdout_log_path" ]; then
+        log_paths+=("$stdout_log_path")
+      fi
+      if [ -n "$stderr_log_path" ] && [ -f "$stderr_log_path" ]; then
+        log_paths+=("$stderr_log_path")
+      fi
+      if [ "${#log_paths[@]}" -eq 0 ]; then
+        echo "launchd log files not found for $launchd_label" >&2
+        exit 1
+      fi
+      tail -n "$lines" "${log_paths[@]}" \
+        | awk -v pattern="$pattern" '$0 ~ pattern { print }'
+      ;;
+  esac
+}
+
+follow_service_logs_filtered() {
+  local lines="$1"
+  local pattern="$2"
+  local log_paths=()
+
+  case "$service_manager" in
+    systemd)
+      journalctl --user -u "$service_name" -n "$lines" -f --no-pager \
+        | awk -v pattern="$pattern" '$0 ~ pattern { print; fflush() }'
+      ;;
+    launchd)
+      if [ -n "$stdout_log_path" ] && [ -f "$stdout_log_path" ]; then
+        log_paths+=("$stdout_log_path")
+      fi
+      if [ -n "$stderr_log_path" ] && [ -f "$stderr_log_path" ]; then
+        log_paths+=("$stderr_log_path")
+      fi
+      if [ "${#log_paths[@]}" -eq 0 ]; then
+        echo "launchd log files not found for $launchd_label" >&2
+        exit 1
+      fi
+      if command -v stdbuf >/dev/null 2>&1; then
+        stdbuf -oL tail -n "$lines" -F "${log_paths[@]}" \
+          | awk -v pattern="$pattern" '$0 ~ pattern { print; fflush() }'
+        return 0
+      fi
+      tail -n "$lines" -F "${log_paths[@]}" \
+        | awk -v pattern="$pattern" '$0 ~ pattern { print; fflush() }'
+      ;;
+  esac
+}
+
 print_service_file() {
   case "$service_manager" in
     systemd)
@@ -558,6 +625,11 @@ print_service_status'
   logs)
     lines="${1:-120}"
     run_remote_openclaw "logs" 'print_service_logs '"$(printf '%q' "$lines")"
+    ;;
+  logs-knowhere)
+    lines="${1:-120}"
+    pattern="${OPENCLAW_KNOWHERE_LOG_PATTERN:-knowhere|tracker progress}"
+    run_remote_openclaw "logs-knowhere" 'print_service_logs_filtered '"$(printf '%q' "$lines")"' '"$(printf '%q' "$pattern")"
     ;;
   watch-agent)
     if [ "$#" -eq 0 ]; then
@@ -914,6 +986,22 @@ EOF
 )"
     stream_remote_openclaw "$remote_watch_script"
     ;;
+  watch-knowhere)
+    lines="${1:-120}"
+    if [ "$#" -gt 1 ]; then
+      echo "watch-knowhere accepts at most one optional line-count argument" >&2
+      exit 1
+    fi
+    pattern="${OPENCLAW_KNOWHERE_LOG_PATTERN:-knowhere|tracker progress}"
+    remote_watch_script="$(cat <<EOF
+set -euo pipefail
+lines=$(printf '%q' "$lines")
+pattern=$(printf '%q' "$pattern")
+follow_service_logs_filtered "\$lines" "\$pattern"
+EOF
+)"
+    stream_remote_openclaw "$remote_watch_script"
+    ;;
   service-file)
     run_remote_openclaw "service-file" 'print_service_file'
     ;;
@@ -938,6 +1026,88 @@ reload_service_manager
 restart_service
 run_openclaw health
 print_service_status'
+    ;;
+  install-gateway-no-proxy)
+    if [ "$#" -ne 1 ]; then
+      echo "install-gateway-no-proxy requires one comma-separated NO_PROXY value" >&2
+      exit 1
+    fi
+    no_proxy_value="$1"
+    remote_install_script="$(cat <<EOF
+set -euo pipefail
+target_no_proxy=$(printf '%q' "$no_proxy_value")
+
+merge_no_proxy_csv() {
+  local current="\$1"
+  local additions="\$2"
+  local merged=""
+  local list=""
+  local entry=""
+  local trimmed=""
+  local old_ifs="\$IFS"
+
+  for list in "\$current" "\$additions"; do
+    [ -z "\$list" ] && continue
+    IFS=','
+    read -r -a entries <<<"\$list"
+    IFS="\$old_ifs"
+    for entry in "\${entries[@]}"; do
+      trimmed="\$(printf '%s' "\$entry" | sed 's/^[[:space:]]*//; s/[[:space:]]*\$//')"
+      [ -z "\$trimmed" ] && continue
+      case ",\$merged," in
+        *",\$trimmed,"*) ;;
+        *)
+          if [ -z "\$merged" ]; then
+            merged="\$trimmed"
+          else
+            merged="\$merged,\$trimmed"
+          fi
+          ;;
+      esac
+    done
+  done
+
+  printf '%s\n' "\$merged"
+}
+
+set_or_unset_env_var() {
+  local key="\$1"
+  local value="\$2"
+
+  if [ -n "\$value" ]; then
+    export "\$key=\$value"
+    return 0
+  fi
+
+  unset "\$key" || true
+}
+
+if [ "\$service_manager" != "launchd" ]; then
+  echo "install-gateway-no-proxy currently supports launchd-managed hosts only" >&2
+  exit 1
+fi
+
+current_http_proxy="\$(read_launchd_value 'EnvironmentVariables:HTTP_PROXY' 2>/dev/null || true)"
+current_https_proxy="\$(read_launchd_value 'EnvironmentVariables:HTTPS_PROXY' 2>/dev/null || true)"
+current_all_proxy="\$(read_launchd_value 'EnvironmentVariables:ALL_PROXY' 2>/dev/null || true)"
+current_no_proxy="\$(read_launchd_value 'EnvironmentVariables:NO_PROXY' 2>/dev/null || true)"
+merged_no_proxy="\$(merge_no_proxy_csv "\$current_no_proxy" "\$target_no_proxy")"
+
+set_or_unset_env_var HTTP_PROXY "\$current_http_proxy"
+set_or_unset_env_var HTTPS_PROXY "\$current_https_proxy"
+set_or_unset_env_var ALL_PROXY "\$current_all_proxy"
+set_or_unset_env_var NO_PROXY "\$merged_no_proxy"
+set_or_unset_env_var no_proxy "\$merged_no_proxy"
+
+echo "Reinstalling gateway with NO_PROXY=\$merged_no_proxy"
+run_openclaw gateway install --runtime node --force
+sleep 2
+print_service_status
+echo "LaunchAgent NO_PROXY:"
+read_launchd_value 'EnvironmentVariables:NO_PROXY' 2>/dev/null || true
+EOF
+)"
+    run_remote_openclaw "install-gateway-no-proxy" "$remote_install_script"
     ;;
   exec)
     if [ "$#" -eq 0 ]; then
