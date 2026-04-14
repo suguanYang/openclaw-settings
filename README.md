@@ -57,9 +57,12 @@ directory, and use the same render/apply flow above.
 - Status: `./scripts/openclaw-host.sh --host <ssh-host> status`
 - Restart: `./scripts/openclaw-host.sh --host <ssh-host> restart`
 - Logs: `./scripts/openclaw-host.sh --host <ssh-host> logs 120`
+- Knowhere logs: `./scripts/openclaw-host.sh --host <ssh-host> logs-knowhere 200`
+- Watch Knowhere logs live: `./scripts/openclaw-host.sh --host <ssh-host> watch-knowhere 120`
 - Watch the latest session for one agent with all transcript record types: `./scripts/openclaw-host.sh --host <ssh-host> watch-agent research-lead`
 - Watch raw JSONL instead of pretty text: `./scripts/openclaw-host.sh --host <ssh-host> watch-agent research-lead --raw`
 - Adjust the initial transcript history window: `OPENCLAW_WATCH_LINES=300 ./scripts/openclaw-host.sh --host <ssh-host> watch-agent research-lead`
+- Override the default Knowhere log filter when needed: `OPENCLAW_KNOWHERE_LOG_PATTERN='knowhere|tracker progress|sendMessage failed' ./scripts/openclaw-host.sh --host <ssh-host> watch-knowhere 120`
 - Health: `./scripts/openclaw-host.sh --host <ssh-host> health`
 - Snapshot: `./scripts/openclaw-host.sh --host <ssh-host> snapshot`
 - Update: `./scripts/openclaw-host.sh --host <ssh-host> update`
