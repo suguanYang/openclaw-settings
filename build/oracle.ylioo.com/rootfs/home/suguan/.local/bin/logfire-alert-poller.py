@@ -557,6 +557,7 @@ def build_tracker_message(groups: list[AlertGroup], settings: Settings) -> str:
     guidance = [
         "Do not mention polling, cron, MCP, Oracle internals, or implementation details.",
         "State the likely impact and whether the issue looks user-caused, client-caused, or server-side when the facts support that.",
+        "Include one sample trace ID verbatim for each reported group when available.",
         "Keep the Discord message short and concrete.",
     ]
     lines: list[str] = [
@@ -571,6 +572,7 @@ def build_tracker_message(groups: list[AlertGroup], settings: Settings) -> str:
     lines.extend(["", "Alert groups:"])
     expanded_groups = groups[: settings.max_groups_per_message]
     for index, group in enumerate(expanded_groups, start=1):
+        primary_trace_id = group.trace_ids[0] if group.trace_ids else "(none)"
         trace_summary = ", ".join(group.trace_ids) if group.trace_ids else "(none)"
         lines.extend(
             [
@@ -584,6 +586,7 @@ def build_tracker_message(groups: list[AlertGroup], settings: Settings) -> str:
                 f"   occurrences_in_window: {group.occurrence_count}",
                 f"   first_seen_in_window: {group.first_seen_at.isoformat()}",
                 f"   last_seen_in_window: {group.last_seen_at.isoformat()}",
+                f"   primary_trace_id: {primary_trace_id}",
                 f"   sample_trace_ids: {trace_summary}",
             ],
         )
