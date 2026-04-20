@@ -28,7 +28,7 @@
       "ikuncode-codex": {
         "baseUrl": "${OPENAI_BASE_URL}",
         "apiKey": "${OPENAI_API_KEY}",
-        "api": "openai-responses",
+        "api": "openai-completions",
         "headers": {
           "User-Agent": "Mozilla/5.0"
         },
@@ -37,6 +37,10 @@
             "id": "gpt-5.3-codex",
             "name": "gpt-5.3-codex",
             "reasoning": true,
+            "compat": {
+              "supportsReasoningEffort": true,
+              "supportsTools": true
+            },
             "input": [
               "text"
             ],
@@ -53,6 +57,10 @@
             "id": "gpt-5.2-codex",
             "name": "gpt-5.2-codex",
             "reasoning": true,
+            "compat": {
+              "supportsReasoningEffort": true,
+              "supportsTools": true
+            },
             "input": [
               "text"
             ],
@@ -69,6 +77,10 @@
             "id": "gpt-5.2",
             "name": "gpt-5.2",
             "reasoning": true,
+            "compat": {
+              "supportsReasoningEffort": true,
+              "supportsTools": true
+            },
             "input": [
               "text"
             ],
@@ -94,7 +106,8 @@
       "models": {
         "ikuncode-codex/gpt-5.3-codex": {
           "params": {
-            "maxTokens": 1024
+            "maxTokens": 1024,
+            "responsesServerCompaction": true
           },
           "streaming": false
         },
@@ -521,8 +534,6 @@
       "acpx": {
         "enabled": true,
         "config": {
-          "command": "acpx",
-          "expectedVersion": "0.1.16",
           "cwd": "/home/suguan/openclaw-workspace",
           "permissionMode": "approve-all",
           "nonInteractivePermissions": "fail",
