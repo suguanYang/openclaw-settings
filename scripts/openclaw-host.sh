@@ -1021,10 +1021,20 @@ EOF
   update|update-pnpm|update-npm)
     run_remote_openclaw "update-pnpm" 'ensure_pnpm_available
 "$pnpm_bin" add -g openclaw@latest
-run_openclaw doctor --yes --fix
+if command -v openclaw >/dev/null 2>&1; then
+  openclaw gateway install --runtime node --force
+  openclaw doctor --repair
+else
+  run_openclaw gateway install --runtime node --force
+  run_openclaw doctor --repair
+fi
 reload_service_manager
 restart_service
-run_openclaw health
+if command -v openclaw >/dev/null 2>&1; then
+  openclaw health
+else
+  run_openclaw health
+fi
 print_service_status'
     ;;
   install-gateway-no-proxy)
