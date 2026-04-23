@@ -1,7 +1,0 @@
-{
-  "agents": {
-    "codex": {
-      "command": "/home/suguan/.local/bin/openclaw-codex-acp"
-    }
-  }
-}

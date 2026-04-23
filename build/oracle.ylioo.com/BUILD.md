@@ -17,13 +17,11 @@ Typical tracked files here:
 
 - `rootfs/home/suguan/.openclaw/openclaw.json`
 - `rootfs/home/suguan/.openclaw/.env`
-- `rootfs/home/suguan/.openclaw/acp-harness.env`
-- `rootfs/home/suguan/.acpx/config.json`
-- `rootfs/home/suguan/.codex/config.toml`
-- `rootfs/home/suguan/.local/bin/openclaw-codex-acp`
-- `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
+- `rootfs/home/suguan/.config/systemd/user/logfire-alert-poller.service`
+- `rootfs/home/suguan/.config/systemd/user/logfire-alert-poller.timer`
+- `rootfs/home/suguan/.local/bin/logfire-alert-poller.py`
+- `rootfs/home/suguan/.local/share/logfire-alert-poller/`
 - `rootfs/home/suguan/.openclaw/workspace*/`
-- `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
 
 ## What This Directory Does Not Contain
 
@@ -47,7 +45,9 @@ not live operational residue.
 
 `scripts/render-build-state.sh` reads this tree, merges in local secrets, and
 renders the staged output. `scripts/apply-build-host.sh` calls the renderer,
-uploads the result to the target host, and repairs the live installation.
+uploads the result to the target host, repairs the live installation, and
+removes the older Oracle Codex ACP wrapper/env files that are no longer part of
+the tracked build state.
 
 Tracked root-owned files under `rootfs/etc/` are still part of desired Oracle
 state, but they are not installed by `scripts/apply-build-host.sh` because

@@ -22,47 +22,19 @@ Tracked sources:
 - `rootfs/home/suguan/.openclaw/openclaw.json`
 - `rootfs/home/suguan/.openclaw/.env`
 
-## ACP and model setup
+## Model and ACP status
 
-- ACP is enabled with the `acpx` backend.
-- The default ACP agent is `codex`.
-- The only allowed ACP agent is `codex`.
-- The service loads `%h/.openclaw/acp-harness.env` through a systemd drop-in so
-  ACP-side harnesses can reuse the managed OpenAI-compatible credentials.
-- The tracked Codex-side setting pins `gpt-5.3-codex` with
-  `openai_base_url = https://api.ikuncode.cc/v1` in `~/.codex/config.toml`, so
-  Codex ACP uses the same ikuncode OpenAI-compatible endpoint as the main
-  OpenClaw agents while reusing `OPENAI_API_KEY` from the ACP harness
-  environment.
-- The ACP harness env also exports `CODEX_API_KEY` from the same managed
-  secret because the current Codex CLI build on Oracle authenticates correctly
-  with that alias.
-- `~/.acpx/config.json` routes the `codex` ACP harness through a local wrapper
-  script at `~/.local/bin/openclaw-codex-acp`.
-- That wrapper now mounts a persistent Codex home from
-  `~/.local/share/openclaw-codex-acp/home` into the container so Codex ACP
-  session state survives ordinary turn-to-turn re-entry instead of always
-  reseeding from an empty home.
-- Operator-facing Discord usage for this ACP setup is documented in `ACP.md`.
-- That wrapper runs Codex ACP in a local Docker image because Oracle is still
-  on Ubuntu 20.04 arm64, while the upstream `codex-acp` Linux arm64 binary
-  currently requires newer glibc/OpenSSL runtime libraries than the host
-  provides.
-- The live host baseline behind that decision is:
-  - Ubuntu 20.04.6 LTS (`focal`) on `arm64`
-  - `glibc` 2.31 from the distro
-  - OpenSSL 1.1 on the host library path
-- The upstream `codex-acp` Linux arm64 binary was observed to require:
-  - `GLIBC_2.32`
-  - `GLIBC_2.33`
-  - `GLIBC_2.34`
-  - `libssl.so.3`
-  - `libcrypto.so.3`
-- This repository intentionally does not try to "fix" that mismatch by
-  replacing host `glibc` or OpenSSL in place. On this server, that would be an
-  operator-level OS/runtime upgrade risk rather than a safe app-level change.
-  The tracked approach is to keep the host stable and run Codex ACP in a
-  compatible container image instead.
+- OpenClaw agents still use the `ikuncode-codex` OpenAI-compatible provider at
+  `${OPENAI_BASE_URL}`.
+- The tracked model list keeps `gpt-5.3-codex`, `gpt-5.2-codex`, and `gpt-5.2`.
+- The default primary agent model remains `ikuncode-codex/gpt-5.3-codex`.
+- ACP is disabled in the tracked Oracle build (`acp.enabled = false`).
+- Discord thread-bound ACP spawns are also disabled
+  (`channels.discord.threadBindings.spawnAcpSessions = false`).
+- The tracked Oracle build no longer manages `acpx`, Codex ACP wrapper scripts,
+  ACP harness env files, or the Oracle-specific Codex ACP container image.
+- `ACP.md` now records the disabled Oracle ACP state instead of documenting a
+  live Codex ACP workflow.
 
 Provider layout:
 
@@ -215,15 +187,14 @@ This design avoids any public webhook ingress for Logfire alerts.
 
 ## Plugins and custom extensions
 
-Three plugin entries are enabled:
+Two plugin entries are enabled:
 
-- `acpx`
 - `knowhere-claw`
 - `open-prose`
 
 Important details:
 
-- The explicitly allowed external plugins are `acpx` and `knowhere-claw`.
+- The only explicitly allowed external plugin is `knowhere-claw`.
 - `knowhere-claw` is treated as the external npm plugin
   `@ontos-ai/knowhere-claw`, not a local source checkout.
 - The current Oracle target is the pinned npm spec
@@ -237,35 +208,12 @@ Important details:
 - `plugins.installs` is CLI-managed host runtime state used by
   `openclaw plugins update`, so it is not hand-edited or mirrored under
   `build/`.
-- `acpx` is configured with:
-  - `command = acpx`
-  - `expectedVersion = 0.1.16`
-  - `cwd = /home/suguan/openclaw-workspace`
-  - `permissionMode = approve-all`
-  - `nonInteractivePermissions = fail`
-  - `mcpServers.logfire = bash -lc 'exec mcp-remote https://logfire-us.pydantic.dev/mcp --header "Authorization: Bearer $LOGFIRE_READ_TOKEN"'`
-    with `LOGFIRE_READ_TOKEN`
-- The apply flow also installs global ACP-side binaries needed by that config:
-  - `acpx@0.1.16`
-  - `@openai/codex@0.115.0`
-  - `mcp-remote@0.1.38`
-- The apply flow also builds `openclaw-codex-acp:ubuntu-24.04` from the
-  tracked Dockerfile under `~/.local/share/openclaw-codex-acp/`. That image
-  layers `uvx`, `@openai/codex@0.115.0`, `@zed-industries/codex-acp@0.10.0`,
-  and `mcp-remote@0.1.38` onto the existing
-  `openclaw-sandbox:ubuntu-24.04-full` base so Codex ACP can run on Oracle and
-  bridge the hosted Logfire MCP endpoint from inside the container.
-- The Logfire MCP path for ACP now uses the hosted endpoint through
-  `mcp-remote`, not the local `uvx logfire-mcp` stdio server. The hosted route
-  matched the working Oracle poller path and was the path verified live with
-  Codex ACP.
+- The apply flow installs `openclaw@latest` and the Logfire poller helper
+  dependencies, but it does not install or build Oracle-specific ACP/Codex
+  wrapper artifacts anymore.
 - `knowhere-claw` stores data under
   `/home/suguan/.openclaw/plugin-state/knowhere`
   with `scopeMode = session`.
-
-ACP sessions spawned through `acpx` now receive the Logfire MCP server during
-session bootstrap, so channel or thread ACP runs can query production Logfire
-data without the native OpenClaw agents carrying a separate handwritten client.
 
 Installed Knowhere plugin files live on the host under
 `~/.openclaw/extensions/knowhere-claw/` after the npm install. They are runtime
@@ -277,12 +225,10 @@ The main tracked files behind this overview are:
 
 - `rootfs/home/suguan/.openclaw/openclaw.json`
 - `rootfs/home/suguan/.openclaw/.env`
-- `rootfs/home/suguan/.openclaw/acp-harness.env`
-- `rootfs/home/suguan/.acpx/config.json`
-- `rootfs/home/suguan/.codex/config.toml`
-- `rootfs/home/suguan/.local/bin/openclaw-codex-acp`
-- `rootfs/home/suguan/.local/share/openclaw-codex-acp/Dockerfile`
-- `rootfs/home/suguan/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf`
+- `rootfs/home/suguan/.config/systemd/user/logfire-alert-poller.service`
+- `rootfs/home/suguan/.config/systemd/user/logfire-alert-poller.timer`
+- `rootfs/home/suguan/.local/bin/logfire-alert-poller.py`
+- `rootfs/home/suguan/.local/share/logfire-alert-poller/`
 - `rootfs/home/suguan/.openclaw/workspace*/`
 
 Installed plugin payloads under `~/.openclaw/extensions/` and CLI-managed

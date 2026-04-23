@@ -225,17 +225,31 @@ if ! command -v pnpm >/dev/null 2>&1; then
 fi
 
 hash -r
-pnpm add -g openclaw@latest acpx@0.1.16 @openai/codex@0.115.0 mcp-remote@0.1.38
+pnpm add -g openclaw@latest
 hash -r
 
-codex_acp_image_root="$HOME/.local/share/openclaw-codex-acp"
-if [ -f "$codex_acp_image_root/Dockerfile" ]; then
-  if ! command -v docker >/dev/null 2>&1; then
-    echo "missing docker; cannot build tracked Codex ACP image" >&2
-    exit 1
+remove_stale_codex_integration_paths() {
+  local path=""
+
+  for path in \
+    "$HOME/.openclaw/acp-harness.env" \
+    "$HOME/.acpx/config.json" \
+    "$HOME/.local/bin/openclaw-codex-acp" \
+    "$HOME/.config/systemd/user/openclaw-gateway.service.d/acp-harness.conf"; do
+    if [ -e "$path" ]; then
+      rm -f "$path"
+    fi
+  done
+
+  if [ -d "$HOME/.local/share/openclaw-codex-acp" ]; then
+    rm -rf "$HOME/.local/share/openclaw-codex-acp"
   fi
-  docker build -t openclaw-codex-acp:ubuntu-24.04 "$codex_acp_image_root"
-fi
+
+  rmdir "$HOME/.acpx" 2>/dev/null || true
+  rmdir "$HOME/.config/systemd/user/openclaw-gateway.service.d" 2>/dev/null || true
+}
+
+remove_stale_codex_integration_paths
 
 openclaw_bin="$(command -v openclaw || true)"
 if [ -z "$openclaw_bin" ] && [ -x "$PNPM_HOME/openclaw" ]; then

@@ -12,16 +12,7 @@
     "defaultProfile": "openclaw"
   },
   "acp": {
-    "enabled": true,
-    "backend": "acpx",
-    "defaultAgent": "codex",
-    "allowedAgents": [
-      "codex"
-    ],
-    "maxConcurrentSessions": 4,
-    "runtime": {
-      "ttlMinutes": 180
-    }
+    "enabled": false
   },
   "models": {
     "providers": {
@@ -271,8 +262,7 @@
     "agentToAgent": {
       "enabled": true,
       "allow": [
-        "researcher",
-        "codex"
+        "researcher"
       ]
     },
     "sandbox": {
@@ -445,7 +435,7 @@
         "idleHours": 72,
         "maxAgeHours": 0,
         "spawnSubagentSessions": true,
-        "spawnAcpSessions": true
+        "spawnAcpSessions": false
       },
       "defaultAccount": "manager",
       "accounts": {
@@ -527,30 +517,9 @@
   },
   "plugins": {
     "allow": [
-      "acpx",
       "knowhere-claw"
     ],
     "entries": {
-      "acpx": {
-        "enabled": true,
-        "config": {
-          "cwd": "/home/suguan/openclaw-workspace",
-          "permissionMode": "approve-all",
-          "nonInteractivePermissions": "fail",
-          "mcpServers": {
-            "logfire": {
-              "command": "bash",
-              "args": [
-                "-lc",
-                "exec mcp-remote https://logfire-us.pydantic.dev/mcp --header \"Authorization: Bearer $LOGFIRE_READ_TOKEN\""
-              ],
-              "env": {
-                "LOGFIRE_READ_TOKEN": "${LOGFIRE_READ_TOKEN}"
-              }
-            }
-          }
-        }
-      },
       "knowhere-claw": {
         "enabled": true,
         "config": {
